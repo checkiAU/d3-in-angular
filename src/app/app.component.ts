@@ -1,22 +1,48 @@
 import { Component, OnInit, NgZone } from '@angular/core';
 import { Router } from '@angular/router';
 import { ChartControlsService } from './chart-controls.service';
+import { trigger, transition, query, style, animate } from '@angular/animations';
 
-//https://stackoverflow.com/questions/38087013/angular2-web-speech-api-voice-recognition
-export interface IWindow extends Window {
-  webkitSpeechRecognition: any;
-  webkitAudioContext: any;
-}
+ 
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss']
+  styleUrls: ['./app.component.scss'],
+  animations: [trigger('fadeAnimation', [
+
+    transition('* => *', [
+
+      query(':enter',
+        [
+          style({ opacity: 0 })
+        ],
+        { optional: true }
+      ),
+
+      query(':leave',
+        [
+          style({ opacity: 1 }),
+          animate('0.2s', style({ opacity: 0 }))
+        ],
+        { optional: true }
+      ),
+
+      query(':enter',
+        [
+          style({ opacity: 0 }),
+          animate('0.2s', style({ opacity: 1 }))
+        ],
+        { optional: true }
+      )
+
+    ])
+
+  ])]
 })
 export class AppComponent implements OnInit {
   title = 'Using d3 within Angular 8';
-  flashMob = false;
-
+ 
   constructor(
     private router: Router,
     private ngZone: NgZone,
@@ -25,6 +51,9 @@ export class AppComponent implements OnInit {
   ngOnInit() {
   }
 
+  public getRouterOutletState(outlet) {
+    return true;
+  }
 
   navigate(path) {
     this.ngZone.run(() => {

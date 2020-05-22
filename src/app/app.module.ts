@@ -13,14 +13,15 @@ import {MatTableModule} from '@angular/material/table';
 import {MatSlideToggleModule} from '@angular/material/slide-toggle';
 import { OrderStatusComponent } from './order-status/order-status.component';
 import { OrderUnitedStatesComponent } from './order-unitedstates/order-unitedstates.component';
+import { OrderCountiesComponent } from './order-counties/order-counties.component';
 
 import { DonutChartComponent } from './donut-chart/donut-chart.component';
 import { OrderDeliveryComponent } from './order-delivery/order-delivery.component';
 import { AreaChartComponent } from './area-chart/area-chart.component';
-import { FlashMobComponent } from './fm/flash-mob.component';
 import { UnitedStatesMapComponent} from './unitedstates-map/unitedstates-map.component'
+import { CountiesMapComponent } from './counties-map/counties-map.component';
  
-
+import { DrillDownService } from './shared/drilldown.services';
 
 @NgModule({
   declarations: [
@@ -29,9 +30,10 @@ import { UnitedStatesMapComponent} from './unitedstates-map/unitedstates-map.com
     DonutChartComponent,
     OrderDeliveryComponent,
     AreaChartComponent,
-    FlashMobComponent,
     OrderUnitedStatesComponent,
-    UnitedStatesMapComponent
+    UnitedStatesMapComponent,
+    OrderCountiesComponent,
+    CountiesMapComponent
   ],
   imports: [
     BrowserModule,
@@ -46,7 +48,7 @@ import { UnitedStatesMapComponent} from './unitedstates-map/unitedstates-map.com
     MatSlideToggleModule
     
   ],
-  providers: [],
+  providers: [DrillDownService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

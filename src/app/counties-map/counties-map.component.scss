@@ -1,24 +1,11 @@
 .county {
   stroke: grey;
   stroke-width: 0.3;
-  cursor: pointer;
 }
 
 .background {
   fill: none;
   pointer-events: all;
-}
-
-
-.county.active {
-  fill: orange;
-}
-
-.mesh {
-  fill: none;
-  stroke: #fff;
-  stroke-linecap: round;
-  stroke-linejoin: round;
 }
 
 div.tooltip {

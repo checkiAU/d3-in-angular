@@ -9,12 +9,13 @@ import { DrillDownService } from '../shared/drilldown.services';
 
  
 @Component({
-  selector: 'app-unitedstates-map',
+  selector: 'app-counties-map',
   encapsulation: ViewEncapsulation.None,
-  templateUrl: './unitedstates-map.component.html',
-  styleUrls: ['./unitedstates-map.component.scss']
+  templateUrl: './counties-map.component.html',
+  styleUrls: ['./counties-map.component.scss']
+ 
 })
-export class UnitedStatesMapComponent implements OnInit {
+export class CountiesMapComponent implements OnInit {
 
   @Input() data: number[];
   hostElement; // Native element hosting the SVG container
@@ -32,12 +33,11 @@ export class UnitedStatesMapComponent implements OnInit {
   height = 500;
 
 
- 
   centered;
 
   legendContainerSettings = {
     x: 0,
-    y: this.height ,
+    y: this.height,
     width: 370,
     height: 75,
     roundX: 10,
@@ -50,6 +50,8 @@ export class UnitedStatesMapComponent implements OnInit {
     y: this.legendContainerSettings.y + 55
   };
 
+  zoom;
+
   zoomSettings = {
     duration: 1000,
     ease: d3.easeCubicOut,
@@ -61,16 +63,11 @@ export class UnitedStatesMapComponent implements OnInit {
 
   legendData = [0, 0.2, 0.4, 0.6, 0.8, 1];
 
-  states: any[] = [];
-  densities: any[] = [];
-  merged: any[] = [];
-
+  counties: any[] = [];
   legendLabels: any[] = [];
   meanDensity;
   scaleDensity;
-
-  zoom;
-  active;
+  selectedState;
 
   color = d3.scaleSequential(d3.interpolateReds);
 
@@ -88,7 +85,8 @@ export class UnitedStatesMapComponent implements OnInit {
       filter(event => event instanceof NavigationEnd)
     ).subscribe((event: NavigationEnd) => {
       this.route.params.subscribe(params => {
-        if (this.router.url === '/unitedstates' || this.router.url === '/') {
+        this.selectedState = this.route.snapshot.params['selectedState']; 
+        if (this.router.url.indexOf( '/counties') != -1  ) {
           this.removeExistingMapFromParent();
           this.updateMap();
         }
@@ -98,7 +96,7 @@ export class UnitedStatesMapComponent implements OnInit {
   }
 
   ngOnInit() {
-
+ 
   }
 
   private removeExistingMapFromParent() {
@@ -109,14 +107,11 @@ export class UnitedStatesMapComponent implements OnInit {
     d3.select(this.hostElement).select('svg').remove();
   }
 
+
+
   updateMap() {
-
-
-    this.active = d3.select(null);
-
-    this.projection = d3.geoAlbersUsa()
-      .scale(1000)
-      .translate([this.width / 2, this.height / 2]);
+ 
+    var that = this;
 
     this.zoom = d3.zoom()
       // no longer in d3 v4 - zoom initialises with zoomIdentity, so it's already at origin
@@ -127,55 +122,42 @@ export class UnitedStatesMapComponent implements OnInit {
         that.zoomed(d, that)
       });
 
+    this.projection = d3.geoAlbersUsa();
+
     this.path = d3.geoPath()
       .projection(this.projection);
 
     this.svg = d3.select(this.hostElement).append('svg')
-      .attr("width", this.width)
-      .attr("height", this.height + 75)
-      .on("click", this.stopped, true);
+      .attr('width', this.width)
+      .attr('height', this.height + 75)
+      //.attr('viewBox', '0 0 ' + viewBoxWidth + ' ' + viewBoxHeight);
 
-    var that = this;
 
-    that.svg.append('rect')
+    this.svg.append('rect')
       .attr('class', 'background')
       .attr('width', this.width)
-      .attr('height', this.height)
-      .on('click', function (d) {
-        that.reset(d, that);
-      });
+      .attr('height', this.height);
+      //.on('click', function (d) {
+      //  that.clicked(d, that);
+      //});
+   
+    this.g = this.svg.append('g');
 
-    this.svg
-      .call(this.zoom); // delete this line to disable free zooming
-
-
-    that.g = this.svg.append('g');
-
-
-    d3.csv("./assets/statesdensity.csv")
-      .then(function (data) {
-        that.densities = data;
-      });
-
-    d3.json("./assets/states.json")
+    d3.json("./assets/counties.json")
       .then(function (data) {
 
-        that.states = data.features;
+        that.counties = topojson.feature(data, data.objects.collection).features;
 
-        that.merged = that.join(that.densities, that.states, "Name", "name", function (state, density) {
-          return {
-            name: state.properties.name,
-            density: (density ? density.Density : 0),
-            geometry: state.geometry,
-            type: state.type,
-            abbrev: (density ? density.FullName : 0)
-          };
-        });
+        if (that.selectedState != 'All') {
+          that.counties = that.counties.filter(function (d) { return d.properties.iso_3166_2 === that.selectedState });
 
-        //that.merged = that.merged.filter(function (d) { return d.name === 'Georgia' });
-
-        var meanDensity = d3.mean(that.merged, function (d: any) {
-          return d.density;
+          that.svg.transition()
+            .duration(750)
+            .call(that.zoom.transform, d3.zoomIdentity.translate(that.drillDownService.x, that.drillDownService.y).scale(that.drillDownService.scale))
+        }
+        
+        var meanDensity = d3.mean(that.counties, function (d: any) {
+          return d.properties.density;
         });
 
         that.scaleDensity = d3.scaleQuantize()
@@ -195,31 +177,30 @@ export class UnitedStatesMapComponent implements OnInit {
         that.g
           .attr('class', 'county')
           .selectAll('path')
-          .data(that.merged)
+          .data(that.counties)
           .enter()
           .append('path')
-
+        
           .attr('d', that.path)
-          .attr("class", "feature")
-          .on("click", function (d) {
-            that.clicked(d, that, this)
-          })
+
           .attr('class', 'county')
           .attr('stroke', 'grey')
           .attr('stroke-width', 0.3)
           .attr('cursor', 'pointer')
           .attr('fill', function (d) {
-            var countyDensity = d.density;
+            var countyDensity = d.properties.density;
             var density = countyDensity ? countyDensity : 0;
             return that.color(that.scaleDensity(density))
           })
-
+          //.on('click', function (d) {
+          //  that.clicked(d, that);
+          //})
           .on('mouseover', function (d) {
             that.tooltip.transition()
               .duration(200)
               .style('opacity', .9);
 
-            that.tooltip.html(d.name + '<br/>' + d.density)
+            that.tooltip.html(d.properties.name + '<br/>' + d.properties.density)
               .style('left', (d3.event.pageX) + 'px')
               .style('top', (d3.event.pageY) + 'px');
 
@@ -282,7 +263,7 @@ export class UnitedStatesMapComponent implements OnInit {
             'font-size', 14)
           .style(
             'font-weight', 'bold')
-          .text('Population Density by State (pop/square mile)');
+          .text('Population Density by County (pop/square mile)');
 
       });
   }
@@ -291,79 +272,10 @@ export class UnitedStatesMapComponent implements OnInit {
     return this.formatDecimal(this.scaleDensity.invertExtent(rangeValue)[1]);
   }
 
-  reset(d, p) {
-    p.active.classed("active", false);
-    p.active = d3.select(null);
-
-    p.svg.transition()
-      .duration(750)
-      // .call( zoom.transform, d3.zoomIdentity.translate(0, 0).scale(1) ); // not in d3 v4
-      .call(p.zoom.transform, d3.zoomIdentity); // updated for d3 v4
-  }
-
-  // If the drag behavior prevents the default click,
-  // also stop propagation so we don’t click-to-zoom.
-  stopped() {
-    if (d3.event.defaultPrevented) d3.event.stopPropagation();
-  }
-
   zoomed(d, p) {
     p.g.style("stroke-width", 1.5 / d3.event.transform.k + "px");
     // g.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")"); // not in d3 v4
     p.g.attr("transform", d3.event.transform); // updated for d3 v4
   }
 
-  clicked(d, p, e) {
-
-    if (p.active.node() === e) return p.reset(d, p);
-    p.active.classed("active", false);
-    p.active = d3.select(e).classed("active", true);
-
-    var bounds = p.path.bounds(d),
-      dx = bounds[1][0] - bounds[0][0],
-      dy = bounds[1][1] - bounds[0][1],
-      x = (bounds[0][0] + bounds[1][0]) / 2,
-      y = (bounds[0][1] + bounds[1][1]) / 2,
-      scale = Math.max(1, Math.min(8, 0.9 / Math.max(dx / p.width, dy / p.height))),
-      translate = [p.width / 2 - scale * x, p.height / 2 - scale * y];
-
-    // Clean up tool tips
-    p.tooltip.transition()
-      .duration(300)
-      .style('opacity', 0);
-
-
-    p.svg.transition()
-      .duration(750)
-      .call(p.zoom.transform, d3.zoomIdentity.translate(translate[0], translate[1]).scale(scale))
-      .on("end", p.drillDown(translate[0], translate[1], scale, d.abbrev)); // updated for d3 v4
-
-
-  }
-
-  drillDown(x,y,scale, state) {
-    this.drillDownService.scale = scale - .25;
-    this.drillDownService.x = x;
-    this.drillDownService.y = y + 80;
-    this.router.navigateByUrl('/counties/' + state);
-  }
-
-  
-
-  join(lookupTable, mainTable, lookupKey, mainKey, select) {
-    var l = lookupTable.length,
-      m = mainTable.length,
-      lookupIndex = [],
-      output = [];
-    for (var i = 0; i < l; i++) { // loop through l items
-      var row = lookupTable[i];
-      lookupIndex[row[lookupKey]] = row; // create an index for lookup table
-    }
-    for (var j = 0; j < m; j++) { // loop through m items
-      var y = mainTable[j];
-      var x = lookupIndex[y.properties[mainKey]]; // get corresponding row from lookupTable
-      output.push(select(y, x)); // select only the columns you need
-    }
-    return output;
-  }
 }

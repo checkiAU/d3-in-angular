@@ -100,7 +100,7 @@ export class OrderStatusComponent implements OnInit, OnDestroy, AfterContentInit
   }
 
   navigateLeft() {
-    this.router.navigate(['/unitedstates']);
+    this.router.navigate(['/counties/All']);
   }
 
   navigateRight() {
