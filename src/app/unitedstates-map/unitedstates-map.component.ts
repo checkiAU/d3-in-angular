@@ -85,6 +85,7 @@ export class UnitedStatesMapComponent implements OnInit {
     ).subscribe((event: NavigationEnd) => {
       this.route.params.subscribe(params => {
         if (this.router.url === '/unitedstates') {
+          this.removeExistingMapFromParent();
           this.updateMap();
         }
       });
@@ -95,8 +96,7 @@ export class UnitedStatesMapComponent implements OnInit {
   ngOnInit() {
 
 
-    this.removeExistingMapFromParent();
-    this.updateMap();
+
   }
 
   private removeExistingMapFromParent() {
@@ -120,18 +120,22 @@ export class UnitedStatesMapComponent implements OnInit {
       .attr('width', '100%')
       .attr('height', '100%')
       //.attr('viewBox', '0 0 ' + viewBoxWidth + ' ' + viewBoxHeight);
-    /*
+
+    var that = this;
+
     this.svg.append('rect')
       .attr('class', 'background')
       .attr('width', '100%')
       .attr('height', '100%')
-      .on('click', this.clicked);
-      */
+      .on('click', function (d) {
+        that.clicked(d, that);
+      });
+   
     this.g = this.svg.append('g')
       .attr("transform", "translate(0,0)");
-    var that = this;
 
-    d3.json("assets/final.json")
+
+    d3.json("./assets/final.json")
       .then(function (data) {
 
         that.counties = topojson.feature(data, data.objects.counties).features;
