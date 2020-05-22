@@ -17,11 +17,11 @@ export class OrderState {
 
 
 @Component({
-  selector: 'app-order-status',
-  templateUrl: './order-status.component.html',
-  styleUrls: ['./order-status.component.scss']
+  selector: 'app-order-unitedstates',
+  templateUrl: './order-unitedstates.component.html',
+  styleUrls: ['./order-unitedstates.component.scss']
 })
-export class OrderStatusComponent implements OnInit, OnDestroy, AfterContentInit {
+export class OrderUnitedStatesComponent implements OnInit, OnDestroy, AfterContentInit {
 
   @ViewChild('ordersByStatusChart', { static: true }) chart: DonutChartComponent;
 
@@ -100,11 +100,11 @@ export class OrderStatusComponent implements OnInit, OnDestroy, AfterContentInit
   }
 
   navigateLeft() {
-    this.router.navigate(['/unitedstates']);
+    this.router.navigate(['/delivery']);
   }
 
   navigateRight() {
-    this.router.navigate(['/delivery']);
+    this.router.navigate(['/status']);
   }
 
   toggleData(event: MatSlideToggleChange) {

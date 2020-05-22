@@ -139,7 +139,7 @@ export class OrderDeliveryComponent implements OnInit, OnDestroy, AfterContentIn
   }
 
   navigateRight() {
-    this.router.navigate(['/status']);
+    this.router.navigate(['/unitedstates']);
   }
 
   navigateLeft() {

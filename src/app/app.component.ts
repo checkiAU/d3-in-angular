@@ -15,7 +15,6 @@ export interface IWindow extends Window {
 })
 export class AppComponent implements OnInit {
   title = 'Using d3 within Angular 8';
-  speechRecogitionState = false;
   flashMob = false;
 
   constructor(
@@ -26,50 +25,6 @@ export class AppComponent implements OnInit {
   ngOnInit() {
   }
 
-  toggleSpeechRecognition() {
-    if ('webkitSpeechRecognition' in window) {
-      const { webkitSpeechRecognition }: IWindow = <IWindow>(window as unknown);
-      const recognition = new webkitSpeechRecognition();
-
-      recognition.continuous = true;
-      recognition.onresult = (event) => {
-        const voiceCommand = event.results[event.results.length - 1][0].transcript;
-
-        this.handleVoiceCommand(voiceCommand);
-      }
-
-      recognition.start();
-    }
-  }
-
-  handleVoiceCommand(command) {
-    const deliveryMatcher = new RegExp('.*delivery.*',"i");
-    const statusMatcher = new RegExp('.*status.*',"i");
-    const hideMatcher = new RegExp('.*hide.*data.*',"i");
-    const showMatcher = new RegExp('.*show.*data.*',"i");
-    const flashMatcher = new RegExp('.*flash.*',"i");
-    if (deliveryMatcher.test(command.trim())) {
-      this.navigate('/delivery');
-      return;
-    }
-    if (statusMatcher.test(command.trim())) {
-      this.navigate('/status');
-      return;
-    }
-    if (showMatcher.test(command.trim())) {
-      this.chartControlsService.showData = true;
-      return;
-    }
-    if (hideMatcher.test(command.trim())) {
-      this.chartControlsService.showData = false;
-      return;
-    }
-    if (flashMatcher.test(command.trim())) {
-      this.chartControlsService.fullScreen = true;
-      this.navigate('/flashmob');
-      return;
-    }
-  }
 
   navigate(path) {
     this.ngZone.run(() => {
