@@ -22,6 +22,8 @@ import { UnitedStatesMapComponent} from './unitedstates-map/unitedstates-map.com
 import { CountiesMapComponent } from './counties-map/counties-map.component';
  
 import { DrillDownService } from './shared/drilldown.services';
+import { ButtonsModule } from '@progress/kendo-angular-buttons';
+
 
 @NgModule({
   declarations: [
@@ -45,7 +47,8 @@ import { DrillDownService } from './shared/drilldown.services';
     MatSelectModule,
     MatTableModule,
     MatButtonModule,
-    MatSlideToggleModule
+    MatSlideToggleModule,
+    ButtonsModule
     
   ],
   providers: [DrillDownService],

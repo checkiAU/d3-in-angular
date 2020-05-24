@@ -8,13 +8,7 @@ import { DonutChartComponent } from './../donut-chart/donut-chart.component';
 import { ChartControlsService } from '../chart-controls.service';
 import { MatSlideToggleChange } from '@angular/material/slide-toggle';
 
-export class OrderState {
-  state: string;
-  stateDisplayValue: string;
-  count: number;
-}
-
-
+ 
 @Component({
   selector: 'app-unitedstates',
   templateUrl: './unitedstates.component.html',
@@ -24,8 +18,7 @@ export class UnitedStatesComponent implements OnInit, OnDestroy, AfterContentIni
 
   @ViewChild('ordersByStatusChart', { static: true }) chart: DonutChartComponent;
 
-  orderStates: OrderState[];
-
+ 
   chartData: number[] = [];
 
   displayedColumns = ['legend', 'orderStatus', 'total'];

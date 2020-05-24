@@ -59,7 +59,7 @@ export class CountiesMapComponent implements OnInit {
     zoomLevel: 5
   };
 
-  formatDecimal = d3.format('.0f');
+  formatDecimal = d3.format(',.0f');
   legendContainer;
 
   legendData = [0, 0.2, 0.4, 0.6, 0.8, 1];
@@ -74,6 +74,7 @@ export class CountiesMapComponent implements OnInit {
 
  
   color = d3.scaleSequential(d3.interpolateReds);
+
 
   private _routerSub = Subscription.EMPTY;
 
@@ -231,9 +232,9 @@ export class CountiesMapComponent implements OnInit {
               .duration(200)
               .style('opacity', .9);
 
-            that.tooltip.html(d.name + '<br/>' + d.cases)
+            that.tooltip.html(d.name + '<br/><b>Total Cases:</b> ' + that.formatDecimal(d.cases))
               .style('left', (d3.event.pageX) + 'px')
-              .style('top', (d3.event.pageY) + 'px');
+              .style('top', (d3.event.pageY) + 'px')
 
             that.changeDetectorRef.detectChanges();;
           })

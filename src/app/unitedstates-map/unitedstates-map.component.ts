@@ -31,8 +31,12 @@ export class UnitedStatesMapComponent implements OnInit {
   width = 960;
   height = 500;
 
+  public buttons = [
+    { text: 'Linear', selected: true},
+    { text: 'Exponential' } ,
+    { text: 'Logarithmic' },
+  ];
 
- 
   centered;
 
   legendContainerSettings = {
@@ -56,7 +60,7 @@ export class UnitedStatesMapComponent implements OnInit {
     zoomLevel: 5
   };
 
-  formatDecimal = d3.format('.0f');
+  formatDecimal = d3.format(',.0f');
   legendContainer;
 
   legendData = [0, 0.2, 0.4, 0.6, 0.8, 1];
@@ -65,14 +69,23 @@ export class UnitedStatesMapComponent implements OnInit {
   covid: any[] = [];
   merged: any[] = [];
 
+  zoom;
+  active;
+
   legendLabels: any[] = [];
   meanCases;
   scaleCases;
 
-  zoom;
-  active;
+  numBars = 6;
+  start = 1;
+  end;
 
-  color = d3.scaleSequential(d3.interpolateReds);
+  scale = "Linear";
+  colorScaleLinear;
+  expScale;
+  colorScaleExp;
+  logScale;
+  colorScaleLog;
 
   private _routerSub = Subscription.EMPTY;
 
@@ -111,7 +124,6 @@ export class UnitedStatesMapComponent implements OnInit {
 
   updateMap() {
 
-
     this.active = d3.select(null);
 
     this.projection = d3.geoAlbersUsa()
@@ -148,9 +160,7 @@ export class UnitedStatesMapComponent implements OnInit {
     this.svg
       .call(this.zoom); // delete this line to disable free zooming
 
-
     that.g = this.svg.append('g');
-
 
     d3.csv("./assets/us-states.csv")
       .then(function (data) {
@@ -171,12 +181,32 @@ export class UnitedStatesMapComponent implements OnInit {
               };
             });
 
-            //that.merged = that.merged.filter(function (d) { return d.name === 'Georgia' });
-            debugger;
-
             var meanCases = d3.mean(that.merged, function (d: any) {
               return d.cases;
             });
+
+            that.end = d3.max(that.merged, function (d: any) {
+              return d.cases;
+            });
+
+            // Linear Scale
+            that.colorScaleLinear = d3.scaleSequential(d3.interpolateReds);
+
+            // Exponential Scale
+            that.expScale = d3.scalePow()
+              .exponent(Math.E)
+              .domain([that.start, that.end])
+            that.colorScaleExp = d3.scaleSequential(
+              (d) => d3.interpolateReds(that.expScale(d))
+            )
+
+            // Log Scale
+            that.logScale = d3.scaleLog()
+              .domain([that.start, that.end])
+            that.colorScaleLog = d3.scaleSequential(
+              (d) => d3.interpolateReds(that.logScale(d))
+            )
+
 
             that.scaleCases = d3.scaleQuantize()
               .domain([0, meanCases])
@@ -211,15 +241,22 @@ export class UnitedStatesMapComponent implements OnInit {
               .attr('fill', function (d) {
                 var cases = d.cases;
                 var cases = cases ? cases : 0;
-                return that.color(that.scaleCases(cases))
-              })
 
+                switch (that.scale) {
+                  case "Linear":
+                    return that.colorScaleLinear(that.scaleCases(cases));
+                  case "Exponential":
+                    return that.colorScaleExp(cases);
+                  case "Logarithmic":
+                    return that.colorScaleLog(cases);
+                }
+              })
               .on('mouseover', function (d) {
                 that.tooltip.transition()
                   .duration(200)
                   .style('opacity', .9);
 
-                that.tooltip.html(d.name + '<br/>' + d.Cases)
+                that.tooltip.html(d.name + '<br/><b>Total Cases:</b> ' + that.formatDecimal(d.cases))
                   .style('left', (d3.event.pageX) + 'px')
                   .style('top', (d3.event.pageY) + 'px');
 
@@ -257,7 +294,15 @@ export class UnitedStatesMapComponent implements OnInit {
               .attr('height', that.legendBoxSettings.height)
               .style(
                 'fill', function (d, i) {
-                  return that.color(d);
+                  switch (that.scale) {
+                    case "Linear":
+                      return that.colorScaleLinear(d);
+                    case "Exponential":
+                      return that.colorScaleExp(d);
+                    case "Logarithmic":
+                       return that.colorScaleLog(d);
+                  }
+                 ;
                 })
               .style(
                 'opacity', 1)
@@ -282,7 +327,7 @@ export class UnitedStatesMapComponent implements OnInit {
                 'font-size', 14)
               .style(
                 'font-weight', 'bold')
-              .text('COVID-19 Cases by State');
+              .text('COVID-19 Cases by State (' + that.scale + ')');
 
           });
       });
@@ -376,4 +421,11 @@ export class UnitedStatesMapComponent implements OnInit {
     }
     return output;
   }
+
+   selectedChange(e, btn) {
+     this.scale = btn.text;
+     this.removeExistingMapFromParent();
+     this.updateMap();
+  }
+
 }

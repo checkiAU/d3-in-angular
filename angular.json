@@ -28,6 +28,12 @@
               "src/assets"
             ],
             "styles": [
+              {
+                "input": "node_modules/@progress/kendo-theme-default/dist/all.css"
+              },
+              {
+                "input": "node_modules/bootstrap/dist/css/bootstrap.css"
+              },
               "src/styles.scss"
             ],
             "scripts": []
@@ -93,6 +99,12 @@
               "src/assets"
             ],
             "styles": [
+              {
+                "input": "node_modules/@progress/kendo-theme-default/dist/all.css"
+              },
+              {
+                "input": "node_modules/bootstrap/dist/css/bootstrap.css"
+              },
               "src/styles.scss"
             ],
             "scripts": []
@@ -124,6 +136,7 @@
           }
         }
       }
-    }},
+    }
+  },
   "defaultProject": "d3-in-angular"
 }
