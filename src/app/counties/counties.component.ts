@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy, AfterContentInit, ElementRef } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, NavigationEnd, ActivatedRoute } from '@angular/router';
 
 import { ViewChild } from '@angular/core';
 
@@ -8,6 +8,8 @@ import { DonutChartComponent } from './../donut-chart/donut-chart.component';
 import * as HOBBITON from './hobbiton.json';
 import { ChartControlsService } from '../chart-controls.service';
 import { MatSlideToggleChange } from '@angular/material/slide-toggle';
+import { Subscription } from 'rxjs';
+import { filter } from 'rxjs/operators';
 
 export class OrderState {
   state: string;
@@ -17,11 +19,11 @@ export class OrderState {
 
 
 @Component({
-  selector: 'app-order-counties',
-  templateUrl: './order-counties.component.html',
-  styleUrls: ['./order-counties.component.scss']
+  selector: 'app-counties',
+  templateUrl: './counties.component.html',
+  styleUrls: ['./counties.component.scss']
 })
-export class OrderCountiesComponent implements OnInit, OnDestroy, AfterContentInit {
+export class CountiesComponent implements OnInit, OnDestroy, AfterContentInit {
 
   @ViewChild('ordersByStatusChart', { static: true }) chart: DonutChartComponent;
 
@@ -32,9 +34,20 @@ export class OrderCountiesComponent implements OnInit, OnDestroy, AfterContentIn
   displayedColumns = ['legend', 'orderStatus', 'total'];
 
   refreshInterval;
+  selectedState = "United States"; 
 
-  constructor(private router: Router, public chartControlsService: ChartControlsService) { 
+  private _routerSub = Subscription.EMPTY;
+
+  constructor(public router: Router, public route: ActivatedRoute, public chartControlsService: ChartControlsService) { 
     this.chartControlsService.fullScreen = false;
+
+    this._routerSub = router.events.pipe(
+      filter(event => event instanceof NavigationEnd)
+    ).subscribe((event: NavigationEnd) => {
+      this.route.params.subscribe(params => {
+        this.selectedState = this.route.snapshot.params['selectedState'];
+      });
+    });
 
   }
 

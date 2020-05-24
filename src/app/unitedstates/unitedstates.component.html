@@ -1,13 +1,13 @@
 <mat-card class="container">
     <mat-card-title class="title">
         <mat-icon (click)="navigateLeft()" class="left">keyboard_arrow_left</mat-icon>
-        <div>Orders in the United States By County</div>
+        <div>Cases in the United States</div>
         <mat-icon (click)="navigateRight()" class="right">keyboard_arrow_right</mat-icon>
     </mat-card-title>
     <mat-card-content id="ordersByStatus" #ordersByStatus>
         <div id="chartAndDataContainer">
             <div id="chartContainer" [ngClass]="{'half': chartControlsService.showData}">
-                <app-counties-map #ordersByStatusChart [data]="chartData"></app-counties-map>
+                <app-unitedstates-map #ordersByStatusChart [data]="chartData"></app-unitedstates-map>
             </div>
             <div id="ordersByStatusTable" *ngIf="chartControlsService.showData">
                 <table mat-table [dataSource]="orderStates" *ngIf="orderStates" class="mat-elevation-z8">

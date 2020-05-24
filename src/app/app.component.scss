@@ -36,7 +36,6 @@ p {
     span {
         font-weight: 900;
         margin: 0 auto;
-        font-family: 'Gloria Hallelujah', cursive;
         font-size: 3rem;
         color: #FF5733;
     }
@@ -46,7 +45,7 @@ p {
 .watermark {
     display: flex;
     position: absolute;
-    width: 100vw;
+    width: 55vw;
     opacity: 0.3;
     top: -40vh;
     left: -40vw;
@@ -61,30 +60,29 @@ p {
         font-size: 2rem;
         color: #FF5733;
     }
-    .watermark {
-        display: flex;
-        position: absolute;
-        width: 100vw;
-        opacity: 0.3;
-        top: -40vh;
-        left: -50vw;
-    }
+  .watermark {
+    display: flex;
+    position: absolute;
+    width: 55vw;
+    opacity: 0.3;
+    top: -40vh;
+    left: -50vw;
+  }
 }
 
 
 @media screen and (max-width: 414px) {
     .toolbar span {
         margin: 0 auto;
-        font-family: 'Gloria Hallelujah', cursive;
         font-size: 1.2rem;
         color: #FF5733;
     }
-    .watermark {
-        display: flex;
-        position: absolute;
-        width: 100vw;
-        opacity: 0.3;
-        top: -40vh;
-        left: -50vw;
-    }
+  .watermark {
+    display: flex;
+    position: absolute;
+    width: 55vw;
+    opacity: 0.3;
+    top: -40vh;
+    left: -50vw;
+  }
 }

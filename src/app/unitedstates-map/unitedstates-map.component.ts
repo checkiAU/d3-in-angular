@@ -56,18 +56,18 @@ export class UnitedStatesMapComponent implements OnInit {
     zoomLevel: 5
   };
 
-  formatDecimal = d3.format('.1f');
+  formatDecimal = d3.format('.0f');
   legendContainer;
 
   legendData = [0, 0.2, 0.4, 0.6, 0.8, 1];
 
   states: any[] = [];
-  densities: any[] = [];
+  covid: any[] = [];
   merged: any[] = [];
 
   legendLabels: any[] = [];
-  meanDensity;
-  scaleDensity;
+  meanCases;
+  scaleCases;
 
   zoom;
   active;
@@ -152,143 +152,146 @@ export class UnitedStatesMapComponent implements OnInit {
     that.g = this.svg.append('g');
 
 
-    d3.csv("./assets/statesdensity.csv")
+    d3.csv("./assets/us-states.csv")
       .then(function (data) {
-        that.densities = data;
-      });
+        that.covid = data;
 
-    d3.json("./assets/states.json")
-      .then(function (data) {
+        d3.json("./assets/states.json")
+          .then(function (data) {
 
-        that.states = data.features;
+            that.states = data.features;
 
-        that.merged = that.join(that.densities, that.states, "Name", "name", function (state, density) {
-          return {
-            name: state.properties.name,
-            density: (density ? density.Density : 0),
-            geometry: state.geometry,
-            type: state.type,
-            abbrev: (density ? density.FullName : 0)
-          };
-        });
+            that.merged = that.join(that.covid, that.states, "state", "name", function (state, covid) {
+              return {
+                name: state.properties.name,
+                cases: (covid ? covid.cases : 0),
+                geometry: state.geometry,
+                type: state.type,
+                abbrev: (covid ? covid.state : 0)
+              };
+            });
 
-        //that.merged = that.merged.filter(function (d) { return d.name === 'Georgia' });
+            //that.merged = that.merged.filter(function (d) { return d.name === 'Georgia' });
+            debugger;
 
-        var meanDensity = d3.mean(that.merged, function (d: any) {
-          return d.density;
-        });
+            var meanCases = d3.mean(that.merged, function (d: any) {
+              return d.cases;
+            });
 
-        that.scaleDensity = d3.scaleQuantize()
-          .domain([0, meanDensity])
-          .range([0, 0.2, 0.4, 0.6, 0.8, 1]);
+            that.scaleCases = d3.scaleQuantize()
+              .domain([0, meanCases])
+              .range([0, 0.2, 0.4, 0.6, 0.8, 1]);
 
-        that.legendLabels = [
-          '<' + that.getPopDensity(0),
-          '>' + that.getPopDensity(0),
-          '>' + that.getPopDensity(0.2),
-          '>' + that.getPopDensity(0.4),
-          '>' + that.getPopDensity(0.6),
-          '>' + that.getPopDensity(0.8)
-        ];
+            that.legendLabels = [
+              '<' + that.getCases(0),
+              '>' + that.getCases(0),
+              '>' + that.getCases(0.2),
+              '>' + that.getCases(0.4),
+              '>' + that.getCases(0.6),
+              '>' + that.getCases(0.8)
+            ];
 
 
-        that.g
-          .attr('class', 'county')
-          .selectAll('path')
-          .data(that.merged)
-          .enter()
-          .append('path')
+            that.g
+              .attr('class', 'county')
+              .selectAll('path')
+              .data(that.merged)
+              .enter()
+              .append('path')
 
-          .attr('d', that.path)
-          .attr("class", "feature")
-          .on("click", function (d) {
-            that.clicked(d, that, this)
-          })
-          .attr('class', 'county')
-          .attr('stroke', 'grey')
-          .attr('stroke-width', 0.3)
-          .attr('cursor', 'pointer')
-          .attr('fill', function (d) {
-            var countyDensity = d.density;
-            var density = countyDensity ? countyDensity : 0;
-            return that.color(that.scaleDensity(density))
-          })
+              .attr('d', that.path)
+              .attr("class", "feature")
+              .on("click", function (d) {
+                that.clicked(d, that, this)
+              })
+              .attr('class', 'county')
+              .attr('stroke', 'grey')
+              .attr('stroke-width', 0.3)
+              .attr('cursor', 'pointer')
+              .attr('fill', function (d) {
+                var cases = d.cases;
+                var cases = cases ? cases : 0;
+                return that.color(that.scaleCases(cases))
+              })
 
-          .on('mouseover', function (d) {
-            that.tooltip.transition()
-              .duration(200)
-              .style('opacity', .9);
+              .on('mouseover', function (d) {
+                that.tooltip.transition()
+                  .duration(200)
+                  .style('opacity', .9);
 
-            that.tooltip.html(d.name + '<br/>' + d.density)
-              .style('left', (d3.event.pageX) + 'px')
-              .style('top', (d3.event.pageY) + 'px');
+                that.tooltip.html(d.name + '<br/>' + d.Cases)
+                  .style('left', (d3.event.pageX) + 'px')
+                  .style('top', (d3.event.pageY) + 'px');
 
-            that.changeDetectorRef.detectChanges();;
-          })
-          .on('mouseout', function (d) {
-            that.tooltip.transition()
-              .duration(300)
-              .style('opacity', 0);
+                that.changeDetectorRef.detectChanges();;
+              })
+              .on('mouseout', function (d) {
+                that.tooltip.transition()
+                  .duration(300)
+                  .style('opacity', 0);
 
-            that.changeDetectorRef.detectChanges();;
-          });;
+                that.changeDetectorRef.detectChanges();;
+              });;
 
-        that.legendContainer = that.svg.append('rect')
-          .attr('x', that.legendContainerSettings.x)
-          .attr('y', that.legendContainerSettings.y)
-          .attr('rx', that.legendContainerSettings.roundX)
-          .attr('ry', that.legendContainerSettings.roundY)
-          .attr('width', that.legendContainerSettings.width)
-          .attr('height', that.legendContainerSettings.height)
-          .attr('id', 'legend-container')
+            that.legendContainer = that.svg.append('rect')
+              .attr('x', that.legendContainerSettings.x)
+              .attr('y', that.legendContainerSettings.y)
+              .attr('rx', that.legendContainerSettings.roundX)
+              .attr('ry', that.legendContainerSettings.roundY)
+              .attr('width', that.legendContainerSettings.width)
+              .attr('height', that.legendContainerSettings.height)
+              .attr('id', 'legend-container')
 
-        var legend = that.svg.selectAll('g.legend')
-          .data(that.legendData)
-          .enter().append('g')
-          .attr('class', 'legend');
+            var legend = that.svg.selectAll('g.legend')
+              .data(that.legendData)
+              .enter().append('g')
+              .attr('class', 'legend');
 
-        legend.append('rect')
-          .attr(
-            'x', function (d, i) {
-              return that.legendContainerSettings.x + that.legendBoxSettings.width * i + 20;
-            })
-          .attr('y', that.legendBoxSettings.y)
-          .attr('width', that.legendBoxSettings.width)
-          .attr('height', that.legendBoxSettings.height)
-          .style(
-            'fill', function (d, i) {
-              return that.color(d);
-            })
-          .style(
-            'opacity', 1)
+            legend.append('rect')
+              .attr(
+                'x', function (d, i) {
+                  return that.legendContainerSettings.x + that.legendBoxSettings.width * i + 20;
+                })
+              .attr('y', that.legendBoxSettings.y)
+              .attr('width', that.legendBoxSettings.width)
+              .attr('height', that.legendBoxSettings.height)
+              .style(
+                'fill', function (d, i) {
+                  return that.color(d);
+                })
+              .style(
+                'opacity', 1)
 
-        legend.append('text')
-          .attr(
-            'x', function (d, i) {
-              return that.legendContainerSettings.x + that.legendBoxSettings.width * i + 30;
-            })
-          .attr(
-            'y', that.legendContainerSettings.y + 52
-          )
-          .style('font-size', 12)
-          .text(function (d, i) {
-            return that.legendLabels[i];
+            legend.append('text')
+              .attr(
+                'x', function (d, i) {
+                  return that.legendContainerSettings.x + that.legendBoxSettings.width * i + 30;
+                })
+              .attr(
+                'y', that.legendContainerSettings.y + 52
+              )
+              .style('font-size', 12)
+              .text(function (d, i) {
+                return that.legendLabels[i];
+              });
+
+            legend.append('text')
+              .attr('x', that.legendContainerSettings.x + 13)
+              .attr('y', that.legendContainerSettings.y + 29)
+              .style(
+                'font-size', 14)
+              .style(
+                'font-weight', 'bold')
+              .text('COVID-19 Cases by State');
+
           });
-
-        legend.append('text')
-          .attr('x', that.legendContainerSettings.x + 13)
-          .attr('y', that.legendContainerSettings.y + 29)
-          .style(
-            'font-size', 14)
-          .style(
-            'font-weight', 'bold')
-          .text('Population Density by State (pop/square mile)');
-
       });
+
+  
   }
 
-  getPopDensity(rangeValue) {
-    return this.formatDecimal(this.scaleDensity.invertExtent(rangeValue)[1]);
+  getCases(rangeValue) {
+    return this.formatDecimal(this.scaleCases.invertExtent(rangeValue)[1]);
   }
 
   reset(d, p) {
@@ -341,11 +344,18 @@ export class UnitedStatesMapComponent implements OnInit {
 
   }
 
-  drillDown(x,y,scale, state) {
-    this.drillDownService.scale = scale - .25;
-    this.drillDownService.x = x;
-    this.drillDownService.y = y + 80;
+  drillDown(x, y, scale, state) {
+    this.drillDownService.scale = scale;
+    if (state == 'Alaska' || state == 'Hawaii') {
+      this.drillDownService.x = x - 300;
+      this.drillDownService.y = y - 50;
+    }
+    else {
+      this.drillDownService.x = x ;
+      this.drillDownService.y = y;
+    }
     this.router.navigateByUrl('/counties/' + state);
+
   }
 
   

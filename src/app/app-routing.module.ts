@@ -2,16 +2,16 @@ import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { OrderStatusComponent } from './order-status/order-status.component';
 import { OrderDeliveryComponent } from './order-delivery/order-delivery.component';
-import { OrderUnitedStatesComponent } from './order-unitedstates/order-unitedstates.component';
-import { OrderCountiesComponent } from './order-counties/order-counties.component';
+import { UnitedStatesComponent } from './unitedstates/unitedstates.component';
+import { CountiesComponent } from './counties/counties.component';
 
 
 const routes: Routes = [
-  { path: 'counties/:selectedState', component: OrderCountiesComponent },
-  { path: 'unitedstates', component: OrderUnitedStatesComponent },
+  { path: 'counties/:selectedState', component: CountiesComponent },
+  { path: 'unitedstates', component: UnitedStatesComponent },
   { path: 'status', component: OrderStatusComponent },
   { path: 'delivery', component: OrderDeliveryComponent },
-  { path: '', component: OrderUnitedStatesComponent }
+  { path: '', component: UnitedStatesComponent }
 ];
 
 @NgModule({

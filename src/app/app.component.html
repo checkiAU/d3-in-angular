@@ -1,7 +1,7 @@
 <div *ngIf="!chartControlsService.fullScreen" class="toolbar" role="banner">
-    <span>Papa Jon's Pizza Pies</span>
+    <span>COVID-19 Data Tracker</span>
 </div>
-<img *ngIf="!chartControlsService.fullScreen" class="watermark" src="assets/pizza.png"/>
+<img *ngIf="!chartControlsService.fullScreen" class="watermark"  />
 <main [@fadeAnimation]="getRouterOutletState(o)">
   <router-outlet #o="outlet"></router-outlet>
 </main>

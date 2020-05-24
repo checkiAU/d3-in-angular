@@ -7,13 +7,13 @@ import { Router, NavigationEnd, ActivatedRoute } from '@angular/router';
 import { tap, catchError, finalize, filter, delay } from 'rxjs/operators';
 import { DrillDownService } from '../shared/drilldown.services';
 
- 
+
 @Component({
   selector: 'app-counties-map',
   encapsulation: ViewEncapsulation.None,
   templateUrl: './counties-map.component.html',
   styleUrls: ['./counties-map.component.scss']
- 
+
 })
 export class CountiesMapComponent implements OnInit {
 
@@ -51,6 +51,7 @@ export class CountiesMapComponent implements OnInit {
   };
 
   zoom;
+  active;
 
   zoomSettings = {
     duration: 1000,
@@ -58,17 +59,20 @@ export class CountiesMapComponent implements OnInit {
     zoomLevel: 5
   };
 
-  formatDecimal = d3.format('.1f');
+  formatDecimal = d3.format('.0f');
   legendContainer;
 
   legendData = [0, 0.2, 0.4, 0.6, 0.8, 1];
 
+  merged: any[] = [];
+  covid: any[] = [];
   counties: any[] = [];
   legendLabels: any[] = [];
-  meanDensity;
-  scaleDensity;
+  meanCases;
+  scaleCases;
   selectedState;
 
+ 
   color = d3.scaleSequential(d3.interpolateReds);
 
   private _routerSub = Subscription.EMPTY;
@@ -85,8 +89,8 @@ export class CountiesMapComponent implements OnInit {
       filter(event => event instanceof NavigationEnd)
     ).subscribe((event: NavigationEnd) => {
       this.route.params.subscribe(params => {
-        this.selectedState = this.route.snapshot.params['selectedState']; 
-        if (this.router.url.indexOf( '/counties') != -1  ) {
+        this.selectedState = this.route.snapshot.params['selectedState'];
+        if (this.router.url.indexOf('/counties') != -1) {
           this.removeExistingMapFromParent();
           this.updateMap();
         }
@@ -96,7 +100,7 @@ export class CountiesMapComponent implements OnInit {
   }
 
   ngOnInit() {
- 
+
   }
 
   private removeExistingMapFromParent() {
@@ -110,7 +114,11 @@ export class CountiesMapComponent implements OnInit {
 
 
   updateMap() {
- 
+
+
+    this.active = d3.select(null);
+
+
     var that = this;
 
     this.zoom = d3.zoom()
@@ -122,7 +130,9 @@ export class CountiesMapComponent implements OnInit {
         that.zoomed(d, that)
       });
 
-    this.projection = d3.geoAlbersUsa();
+    this.projection = d3.geoAlbersUsa()
+      .scale(1000)
+      .translate([this.width / 2, this.height / 2]);
 
     this.path = d3.geoPath()
       .projection(this.projection);
@@ -130,57 +140,78 @@ export class CountiesMapComponent implements OnInit {
     this.svg = d3.select(this.hostElement).append('svg')
       .attr('width', this.width)
       .attr('height', this.height + 75)
-      //.attr('viewBox', '0 0 ' + viewBoxWidth + ' ' + viewBoxHeight);
+      .on("click", this.stopped, true);
 
 
     this.svg.append('rect')
       .attr('class', 'background')
       .attr('width', this.width)
-      .attr('height', this.height);
-      //.on('click', function (d) {
-      //  that.clicked(d, that);
-      //});
-   
+      .attr('height', this.height)
+      .on('click', function (d) {
+        //  Don't zoom out when selecting rect
+        // that.reset(d, that);
+      });
+
+    this.svg
+      .call(this.zoom); // delete this line to disable free zooming
+
     this.g = this.svg.append('g');
+
+    d3.csv("./assets/us-counties.csv")
+      .then(function (data) {
+        that.covid = data;
+      });
 
     d3.json("./assets/counties.json")
       .then(function (data) {
 
         that.counties = topojson.feature(data, data.objects.collection).features;
 
-        if (that.selectedState != 'All') {
-          that.counties = that.counties.filter(function (d) { return d.properties.iso_3166_2 === that.selectedState });
-
-          that.svg.transition()
-            .duration(750)
-            .call(that.zoom.transform, d3.zoomIdentity.translate(that.drillDownService.x, that.drillDownService.y).scale(that.drillDownService.scale))
-        }
-        
-        var meanDensity = d3.mean(that.counties, function (d: any) {
-          return d.properties.density;
+        that.merged = that.join(that.covid, that.counties, "fips", "fips", function (county, covid) {
+          return {
+            name: county.properties.name,
+            cases: (covid ? covid.cases : 0),
+            geometry: county.geometry,
+            type: county.type,
+            state: county.properties.state
+          };
         });
 
-        that.scaleDensity = d3.scaleQuantize()
-          .domain([0, meanDensity])
+        if (that.selectedState != 'All') {
+          that.merged = that.merged.filter(function (d) { return d.state === that.selectedState });
+
+          if (that.drillDownService.x) {
+            that.svg.transition()
+              .duration(750)
+              .call(that.zoom.transform, d3.zoomIdentity.translate(that.drillDownService.x, that.drillDownService.y).scale(that.drillDownService.scale))
+          }
+        }
+
+        var meanCases = d3.mean(that.merged, function (d: any) {
+          return d.cases;
+        });
+
+        that.scaleCases = d3.scaleQuantize()
+          .domain([0, meanCases])
           .range([0, 0.2, 0.4, 0.6, 0.8, 1]);
 
         that.legendLabels = [
-          '<' + that.getPopDensity(0),
-          '>' + that.getPopDensity(0),
-          '>' + that.getPopDensity(0.2),
-          '>' + that.getPopDensity(0.4),
-          '>' + that.getPopDensity(0.6),
-          '>' + that.getPopDensity(0.8)
+          '<' + that.getCases(0),
+          '>' + that.getCases(0),
+          '>' + that.getCases(0.2),
+          '>' + that.getCases(0.4),
+          '>' + that.getCases(0.6),
+          '>' + that.getCases(0.8)
         ];
 
 
         that.g
           .attr('class', 'county')
           .selectAll('path')
-          .data(that.counties)
+          .data(that.merged)
           .enter()
           .append('path')
-        
+
           .attr('d', that.path)
 
           .attr('class', 'county')
@@ -188,9 +219,9 @@ export class CountiesMapComponent implements OnInit {
           .attr('stroke-width', 0.3)
           .attr('cursor', 'pointer')
           .attr('fill', function (d) {
-            var countyDensity = d.properties.density;
-            var density = countyDensity ? countyDensity : 0;
-            return that.color(that.scaleDensity(density))
+            var cases = d.cases;
+            var cases = cases ? cases : 0;
+            return that.color(that.scaleCases(cases))
           })
           //.on('click', function (d) {
           //  that.clicked(d, that);
@@ -200,7 +231,7 @@ export class CountiesMapComponent implements OnInit {
               .duration(200)
               .style('opacity', .9);
 
-            that.tooltip.html(d.properties.name + '<br/>' + d.properties.density)
+            that.tooltip.html(d.name + '<br/>' + d.cases)
               .style('left', (d3.event.pageX) + 'px')
               .style('top', (d3.event.pageY) + 'px');
 
@@ -263,19 +294,52 @@ export class CountiesMapComponent implements OnInit {
             'font-size', 14)
           .style(
             'font-weight', 'bold')
-          .text('Population Density by County (pop/square mile)');
+          .text('Population Cases by County');
 
       });
   }
 
-  getPopDensity(rangeValue) {
-    return this.formatDecimal(this.scaleDensity.invertExtent(rangeValue)[1]);
+  getCases(rangeValue) {
+    return this.formatDecimal(this.scaleCases.invertExtent(rangeValue)[1]);
+  }
+
+  reset(d, p) {
+    p.active.classed("active", false);
+    p.active = d3.select(null);
+
+    p.svg.transition()
+      .duration(750)
+      // .call( zoom.transform, d3.zoomIdentity.translate(0, 0).scale(1) ); // not in d3 v4
+      .call(p.zoom.transform, d3.zoomIdentity); // updated for d3 v4
+  }
+
+  // If the drag behavior prevents the default click,
+  // also stop propagation so we don’t click-to-zoom.
+  stopped() {
+    if (d3.event.defaultPrevented) d3.event.stopPropagation();
   }
 
   zoomed(d, p) {
     p.g.style("stroke-width", 1.5 / d3.event.transform.k + "px");
     // g.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")"); // not in d3 v4
     p.g.attr("transform", d3.event.transform); // updated for d3 v4
+  }
+
+  join(lookupTable, mainTable, lookupKey, mainKey, select) {
+    var l = lookupTable.length,
+      m = mainTable.length,
+      lookupIndex = [],
+      output = [];
+    for (var i = 0; i < l; i++) { // loop through l items
+      var row = lookupTable[i];
+      lookupIndex[row[lookupKey]] = row; // create an index for lookup table
+    }
+    for (var j = 0; j < m; j++) { // loop through m items
+      var y = mainTable[j];
+      var x = lookupIndex[y.properties[mainKey]]; // get corresponding row from lookupTable
+      output.push(select(y, x)); // select only the columns you need
+    }
+    return output;
   }
 
 }
