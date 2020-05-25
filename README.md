@@ -1,17 +1,15 @@
-# Building Reactive Charts in Angular 8 using D3
+# Building Reactive Maps and Charts in Angular 9 using D3
 
-This projects shows how to build reactive charts inside an Angular 8 application using the D3 JavaScript framework.
+This projects shows how to build reactive maps and charts inside an Angular 9 application using the D3 JavaScript framework.
 
-Click [here](https://mpdroid.github.io/d3-in-angular/) to view the demo app.
-
-Click [here](https://medium.com/@marvinpdroid/reactive-charts-in-angular-8-using-d3-4550bb0b4255)  to read the full article that describes some of the motivations behind the code. 
+Click [here](https://jcbowyer.github.io/d3-in-angular/) to view the demo app.
 
 ## Main Dependencies
 
-- Angular 8.2.9
+- Angular 9.1.9
 
-- D3 5.12.0
+- D3 5.16.0
 
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 8.3.8.
+This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 9.1.9.
 
