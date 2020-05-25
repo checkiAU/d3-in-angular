@@ -134,6 +134,10 @@
               "devServerTarget": "d3-in-angular:serve:production"
             }
           }
+        },
+        "deploy": {
+          "builder": "angular-cli-ghpages:deploy",
+          "options": {}
         }
       }
     }
