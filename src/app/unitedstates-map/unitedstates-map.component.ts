@@ -12,7 +12,7 @@ import {
 import * as statesdata from "./states.json";
 import * as coviddata from "./states-covid.json";
 import * as d3 from "d3";
-import * as topojson from "topojson";
+
 import { Subscription } from "rxjs";
 import { Router, NavigationEnd, ActivatedRoute } from "@angular/router";
 import { tap, catchError, finalize, filter, delay } from "rxjs/operators";

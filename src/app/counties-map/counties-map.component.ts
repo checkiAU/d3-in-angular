@@ -1,5 +1,7 @@
 import { Component, OnInit, ElementRef, ViewEncapsulation, Input, SimpleChanges, OnChanges, ChangeDetectorRef } from '@angular/core';
 
+import countiesdata from "./counties.json";
+import * as coviddata from "./counties-covid.json";
 import * as d3 from 'd3';
 import * as topojson from 'topojson';
 import { Subscription } from 'rxjs';
@@ -67,12 +69,13 @@ export class CountiesMapComponent implements OnInit {
   merged: any[] = [];
   covid: any[] = [];
   counties: any[] = [];
+  c: any[] = [];
   legendLabels: any[] = [];
   meanCases;
   scaleCases;
   selectedState;
 
- 
+
   color = d3.scaleSequential(d3.interpolateReds);
 
 
@@ -158,146 +161,150 @@ export class CountiesMapComponent implements OnInit {
 
     this.g = this.svg.append('g');
 
-    d3.csv("./assets/us-counties.csv")
-      .then(function (data) {
-        that.covid = data;
+    //d3.csv("./assets/us-counties.csv")
+    //  .then(function (data) {
+    that.covid = coviddata.counties;
+    //  });
+
+    //d3.json("./assets/counties.json")
+    //   .then(function (countiesdata) {
+    //var data : any = countiesdata.;
+    //that.counties = topojson.feature(data, data.objects.collection).features;
+    debugger;
+    that.counties = topojson.feature(countiesdata, countiesdata.objects.collection).features;
+ 
+    that.merged = that.join(that.covid, that.counties, "fips", "fips", function (county, covid) {
+      return {
+        name: county.properties.name,
+        cases: (covid ? covid.cases : 0),
+        geometry: county.geometry,
+        type: county.type,
+        state: county.properties.state
+      };
+    });
+
+    debugger;
+
+    if (that.selectedState != 'All') {
+      that.merged = that.merged.filter(function (d) { return d.state === that.selectedState });
+
+      if (that.drillDownService.x) {
+        that.svg.transition()
+          .duration(750)
+          .call(that.zoom.transform, d3.zoomIdentity.translate(that.drillDownService.x, that.drillDownService.y).scale(that.drillDownService.scale))
+      }
+    }
+
+    var meanCases = d3.mean(that.merged, function (d: any) {
+      return d.cases;
+    });
+
+    that.scaleCases = d3.scaleQuantize()
+      .domain([0, meanCases])
+      .range([0, 0.2, 0.4, 0.6, 0.8, 1]);
+
+    that.legendLabels = [
+      '<' + that.getCases(0),
+      '>' + that.getCases(0),
+      '>' + that.getCases(0.2),
+      '>' + that.getCases(0.4),
+      '>' + that.getCases(0.6),
+      '>' + that.getCases(0.8)
+    ];
+
+
+    that.g
+      .attr('class', 'county')
+      .selectAll('path')
+      .data(that.merged)
+      .enter()
+      .append('path')
+
+      .attr('d', that.path)
+
+      .attr('class', 'county')
+      .attr('stroke', 'grey')
+      .attr('stroke-width', 0.3)
+      .attr('cursor', 'pointer')
+      .attr('fill', function (d) {
+        var cases = d.cases;
+        var cases = cases ? cases : 0;
+        return that.color(that.scaleCases(cases))
+      })
+      //.on('click', function (d) {
+      //  that.clicked(d, that);
+      //})
+      .on('mouseover', function (d) {
+        that.tooltip.transition()
+          .duration(200)
+          .style('opacity', .9);
+
+        that.tooltip.html(d.name + '<br/><b>Total Cases:</b> ' + that.formatDecimal(d.cases))
+          .style('left', (d3.event.pageX) + 'px')
+          .style('top', (d3.event.pageY) + 'px')
+
+        that.changeDetectorRef.detectChanges();;
+      })
+      .on('mouseout', function (d) {
+        that.tooltip.transition()
+          .duration(300)
+          .style('opacity', 0);
+
+        that.changeDetectorRef.detectChanges();;
+      });;
+
+    that.legendContainer = that.svg.append('rect')
+      .attr('x', that.legendContainerSettings.x)
+      .attr('y', that.legendContainerSettings.y)
+      .attr('rx', that.legendContainerSettings.roundX)
+      .attr('ry', that.legendContainerSettings.roundY)
+      .attr('width', that.legendContainerSettings.width)
+      .attr('height', that.legendContainerSettings.height)
+      .attr('id', 'legend-container')
+
+    var legend = that.svg.selectAll('g.legend')
+      .data(that.legendData)
+      .enter().append('g')
+      .attr('class', 'legend');
+
+    legend.append('rect')
+      .attr(
+        'x', function (d, i) {
+          return that.legendContainerSettings.x + that.legendBoxSettings.width * i + 20;
+        })
+      .attr('y', that.legendBoxSettings.y)
+      .attr('width', that.legendBoxSettings.width)
+      .attr('height', that.legendBoxSettings.height)
+      .style(
+        'fill', function (d, i) {
+          return that.color(d);
+        })
+      .style(
+        'opacity', 1)
+
+    legend.append('text')
+      .attr(
+        'x', function (d, i) {
+          return that.legendContainerSettings.x + that.legendBoxSettings.width * i + 30;
+        })
+      .attr(
+        'y', that.legendContainerSettings.y + 52
+      )
+      .style('font-size', 12)
+      .text(function (d, i) {
+        return that.legendLabels[i];
       });
 
-    d3.json("./assets/counties.json")
-      .then(function (data) {
+    legend.append('text')
+      .attr('x', that.legendContainerSettings.x + 13)
+      .attr('y', that.legendContainerSettings.y + 29)
+      .style(
+        'font-size', 14)
+      .style(
+        'font-weight', 'bold')
+      .text('Population Cases by County');
 
-        that.counties = topojson.feature(data, data.objects.collection).features;
-
-        that.merged = that.join(that.covid, that.counties, "fips", "fips", function (county, covid) {
-          return {
-            name: county.properties.name,
-            cases: (covid ? covid.cases : 0),
-            geometry: county.geometry,
-            type: county.type,
-            state: county.properties.state
-          };
-        });
-
-        if (that.selectedState != 'All') {
-          that.merged = that.merged.filter(function (d) { return d.state === that.selectedState });
-
-          if (that.drillDownService.x) {
-            that.svg.transition()
-              .duration(750)
-              .call(that.zoom.transform, d3.zoomIdentity.translate(that.drillDownService.x, that.drillDownService.y).scale(that.drillDownService.scale))
-          }
-        }
-
-        var meanCases = d3.mean(that.merged, function (d: any) {
-          return d.cases;
-        });
-
-        that.scaleCases = d3.scaleQuantize()
-          .domain([0, meanCases])
-          .range([0, 0.2, 0.4, 0.6, 0.8, 1]);
-
-        that.legendLabels = [
-          '<' + that.getCases(0),
-          '>' + that.getCases(0),
-          '>' + that.getCases(0.2),
-          '>' + that.getCases(0.4),
-          '>' + that.getCases(0.6),
-          '>' + that.getCases(0.8)
-        ];
-
-
-        that.g
-          .attr('class', 'county')
-          .selectAll('path')
-          .data(that.merged)
-          .enter()
-          .append('path')
-
-          .attr('d', that.path)
-
-          .attr('class', 'county')
-          .attr('stroke', 'grey')
-          .attr('stroke-width', 0.3)
-          .attr('cursor', 'pointer')
-          .attr('fill', function (d) {
-            var cases = d.cases;
-            var cases = cases ? cases : 0;
-            return that.color(that.scaleCases(cases))
-          })
-          //.on('click', function (d) {
-          //  that.clicked(d, that);
-          //})
-          .on('mouseover', function (d) {
-            that.tooltip.transition()
-              .duration(200)
-              .style('opacity', .9);
-
-            that.tooltip.html(d.name + '<br/><b>Total Cases:</b> ' + that.formatDecimal(d.cases))
-              .style('left', (d3.event.pageX) + 'px')
-              .style('top', (d3.event.pageY) + 'px')
-
-            that.changeDetectorRef.detectChanges();;
-          })
-          .on('mouseout', function (d) {
-            that.tooltip.transition()
-              .duration(300)
-              .style('opacity', 0);
-
-            that.changeDetectorRef.detectChanges();;
-          });;
-
-        that.legendContainer = that.svg.append('rect')
-          .attr('x', that.legendContainerSettings.x)
-          .attr('y', that.legendContainerSettings.y)
-          .attr('rx', that.legendContainerSettings.roundX)
-          .attr('ry', that.legendContainerSettings.roundY)
-          .attr('width', that.legendContainerSettings.width)
-          .attr('height', that.legendContainerSettings.height)
-          .attr('id', 'legend-container')
-
-        var legend = that.svg.selectAll('g.legend')
-          .data(that.legendData)
-          .enter().append('g')
-          .attr('class', 'legend');
-
-        legend.append('rect')
-          .attr(
-            'x', function (d, i) {
-              return that.legendContainerSettings.x + that.legendBoxSettings.width * i + 20;
-            })
-          .attr('y', that.legendBoxSettings.y)
-          .attr('width', that.legendBoxSettings.width)
-          .attr('height', that.legendBoxSettings.height)
-          .style(
-            'fill', function (d, i) {
-              return that.color(d);
-            })
-          .style(
-            'opacity', 1)
-
-        legend.append('text')
-          .attr(
-            'x', function (d, i) {
-              return that.legendContainerSettings.x + that.legendBoxSettings.width * i + 30;
-            })
-          .attr(
-            'y', that.legendContainerSettings.y + 52
-          )
-          .style('font-size', 12)
-          .text(function (d, i) {
-            return that.legendLabels[i];
-          });
-
-        legend.append('text')
-          .attr('x', that.legendContainerSettings.x + 13)
-          .attr('y', that.legendContainerSettings.y + 29)
-          .style(
-            'font-size', 14)
-          .style(
-            'font-weight', 'bold')
-          .text('Population Cases by County');
-
-      });
+    //});
   }
 
   getCases(rangeValue) {
