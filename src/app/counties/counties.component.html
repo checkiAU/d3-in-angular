@@ -7,7 +7,7 @@
     <mat-card-content id="ordersByStatus" #ordersByStatus>
         <div id="chartAndDataContainer">
             <div id="chartContainer" [ngClass]="{'half': chartControlsService.showData}">
-                <app-counties-map #ordersByStatusChart [data]="chartData"></app-counties-map>
+                <app-counties-map #countiesMap  ></app-counties-map>
             </div>
         </div>
     </mat-card-content>

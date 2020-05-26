@@ -9,11 +9,11 @@ import {
   ChangeDetectorRef
 } from "@angular/core";
 
+import { Location } from '@angular/common';
+
 import * as statesdata from "./states.json";
 import * as coviddata from "./states-covid.json";
 import * as d3 from "d3";
-import legend from 'd3-svg-legend'
-
 
 import { Subscription } from "rxjs";
 import { Router, NavigationEnd, ActivatedRoute } from "@angular/router";
@@ -118,15 +118,25 @@ export class UnitedStatesMapComponent implements OnInit {
     public router: Router,
     public route: ActivatedRoute,
     private changeDetectorRef: ChangeDetectorRef,
-    private drillDownService: DrillDownService
+    private drillDownService: DrillDownService,
+    private location: Location
   ) {
+
+    this.location = location;
     this.hostElement = this.elRef.nativeElement;
 
     this._routerSub = router.events
       .pipe(filter(event => event instanceof NavigationEnd))
       .subscribe((event: NavigationEnd) => {
         this.route.params.subscribe(params => {
-          if (this.router.url === "/unitedstates" || this.router.url === "/") {
+          if (this.route.snapshot.params['selectedType']) {
+            this.type = this.route.snapshot.params['selectedType'];
+          }
+          if (this.route.snapshot.params['selectedScale']) {
+            this.scale = this.route.snapshot.params['selectedScale'];
+          }
+          
+          if (this.router.url.indexOf('/unitedstates') != -1 || this.router.url === "/") {
             this.removeExistingMapFromParent();
             this.updateMap();
           }
@@ -352,6 +362,8 @@ export class UnitedStatesMapComponent implements OnInit {
 
     }
 
+
+
     that.legendContainer = that.svg
       .append("rect")
       .attr("x", that.legendContainerSettings.x)
@@ -478,10 +490,10 @@ export class UnitedStatesMapComponent implements OnInit {
         p.zoom.transform,
         d3.zoomIdentity.translate(translate[0], translate[1]).scale(scale)
       )
-      .on("end", p.drillDown(translate[0], translate[1], scale, d.abbrev)); // updated for d3 v4
+      .on("end", p.drillDown(translate[0], translate[1], scale, d.abbrev, p.type, p.scale)); // updated for d3 v4
   }
 
-  drillDown(x, y, scale, state) {
+  drillDown(x, y, scale, state, type, mapScale) {
     this.drillDownService.scale = scale;
     if (state == "Alaska" || state == "Hawaii") {
       this.drillDownService.x = x - 300;
@@ -490,7 +502,7 @@ export class UnitedStatesMapComponent implements OnInit {
       this.drillDownService.x = x;
       this.drillDownService.y = y;
     }
-    this.router.navigateByUrl("/counties/" + state);
+    this.router.navigateByUrl("/counties/" + state + "/" + type + "/" + mapScale);
   }
 
   join(lookupTable, mainTable, lookupKey, mainKey, select) {
@@ -514,12 +526,14 @@ export class UnitedStatesMapComponent implements OnInit {
 
   selectedScaleChange(e, btn) {
     this.scale = btn.text;
+    this.location.go('unitedstates/' + this.type + '/' + this.scale);
     this.removeExistingMapFromParent();
     this.updateMap();
   }
 
   selectedTypeChange(e, btn) {
     this.type = btn.text;
+    this.location.go('unitedstates/' + this.type + '/' + this.scale);
     this.removeExistingMapFromParent();
     this.updateMap();
   }

@@ -76,10 +76,12 @@ export class CountiesMapComponent implements OnInit {
   scaleCircle;
   selectedState;
 
-   numBars = 6;
-  start = 0;
+  numBars = 6;
+  start = 1;
   end;
   scale = "Linear";
+  type = "Filled";
+
   linearScale;
   colorScaleLinear;
   expScale;
@@ -87,6 +89,17 @@ export class CountiesMapComponent implements OnInit {
   logScale;
   colorScaleLog;
 
+  public scaleButtons = [
+    { text: "Linear", selected: true },
+    { text: "Exponential" },
+    { text: "Logarithmic" }
+  ];
+
+  public typeButtons = [
+    { text: "Filled", selected: true },
+    { text: "Bubble" }
+  ];
+  
   private _routerSub = Subscription.EMPTY;
 
   tooltip = d3.select('body').append('div')
@@ -102,6 +115,14 @@ export class CountiesMapComponent implements OnInit {
     ).subscribe((event: NavigationEnd) => {
       this.route.params.subscribe(params => {
         this.selectedState = this.route.snapshot.params['selectedState'];
+        if (this.route.snapshot.params['selectedType']) {
+          this.type = this.route.snapshot.params['selectedType'];
+        }
+
+        if (this.route.snapshot.params['selectedScale']) {
+          this.scale = this.route.snapshot.params['selectedScale'];
+        }
+        
         if (this.router.url.indexOf('/counties') != -1) {
           this.removeExistingMapFromParent();
           this.updateMap();
@@ -203,7 +224,10 @@ export class CountiesMapComponent implements OnInit {
       return d.cases;
     });
 
-    
+    that.start = d3.min(that.merged, function (d: any) {
+      return d.cases;
+    });
+
     that.end = d3.max(that.merged, function (d: any) {
       return d.cases;
     });
@@ -277,7 +301,19 @@ export class CountiesMapComponent implements OnInit {
       .attr('fill', function (d) {
         var cases = d.cases;
         var cases = cases ? cases : 0;
-        return that.colorScaleLinear(cases)
+        if (that.type == "Filled") {
+          switch (that.scale) {
+            case "Linear":
+              return that.colorScaleLinear(cases);
+            case "Exponential":
+              return that.colorScaleExp(cases);
+            case "Logarithmic":
+              return that.colorScaleLog(cases);
+          }
+        }
+        else {
+          return "#f2f2f2";
+        }
       })
       //.on('click', function (d) {
       //  that.clicked(d, that);
@@ -301,7 +337,7 @@ export class CountiesMapComponent implements OnInit {
         that.changeDetectorRef.detectChanges();;
       });
 
-    if (1 == 1) {
+    if (that.type == "Bubble") {
     that.g
       .attr("class", "bubble")
       .selectAll('circle')
@@ -354,7 +390,14 @@ export class CountiesMapComponent implements OnInit {
       .attr('height', that.legendBoxSettings.height)
       .style(
         'fill', function (d, i) {
-          return that.colorScaleLinear(d);
+          switch (that.scale) {
+            case "Linear":
+              return that.colorScaleLinear(that.linearScale.invert(d));
+            case "Exponential":
+              return that.colorScaleExp(that.expScale.invert(d));
+            case "Logarithmic":
+              return that.colorScaleLog(that.logScale.invert(d));
+          }
         })
       .style(
         'opacity', 1)
@@ -379,7 +422,7 @@ export class CountiesMapComponent implements OnInit {
         'font-size', 14)
       .style(
         'font-weight', 'bold')
-      .text('COVID-19 Cases by County');
+      .text('COVID-19 Cases by County (' + that.scale + ")");
 
   }
 
@@ -424,6 +467,18 @@ export class CountiesMapComponent implements OnInit {
       output.push(select(y, x)); // select only the columns you need
     }
     return output;
+  }
+
+  selectedScaleChange(e, btn) {
+    this.scale = btn.text;
+    this.removeExistingMapFromParent();
+    this.updateMap();
+  }
+
+  selectedTypeChange(e, btn) {
+    this.type = btn.text;
+    this.removeExistingMapFromParent();
+    this.updateMap();
   }
 
 }

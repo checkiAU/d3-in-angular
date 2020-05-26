@@ -1,3 +1,46 @@
-<svg>
-</svg>
+<div class="container">
+  <div class="row">
+    <div class="col-md-12">
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-4">
+      <kendo-buttongroup [selection]="'single'">
+        <button *ngFor="let button of typeButtons"
+                kendoButton
+                [toggleable]="true"
+                [selected]="button.selected"
+                (selectedChange)="selectedTypeChange($event, button)">
+          <span>
+            {{ button.text }}
+          </span>
+        </button>
+      </kendo-buttongroup>
+
+    </div>
+    <div class="col-md-4">
+    </div>
+    <div class="col-md-4">
+
+      <kendo-buttongroup [selection]="'single'">
+        <button *ngFor="let button of scaleButtons"
+                kendoButton
+                [toggleable]="true"
+                [selected]="button.selected"
+                (selectedChange)="selectedScaleChange($event, button)">
+          <span>
+            {{ button.text }}
+          </span>
+        </button>
+      </kendo-buttongroup>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-12">
+      <svg>
+      </svg>
+    </div>
+  </div>
+</div>
 
