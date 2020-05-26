@@ -4,7 +4,6 @@ import { Router } from '@angular/router';
 import { ViewChild } from '@angular/core';
 
 import { ChartControlsService } from '../chart-controls.service';
-import { MatSlideToggleChange } from '@angular/material/slide-toggle';
 import { UnitedStatesMapComponent } from '../unitedstates-map/unitedstates-map.component';
 
  
@@ -65,9 +64,7 @@ export class UnitedStatesComponent implements OnInit, OnDestroy, AfterContentIni
     this.router.navigate(['/status']);
   }
 
-  toggleData(event: MatSlideToggleChange) {
-    this.chartControlsService.showData = event.checked;
-  }
+
 }
 
 export function randomInt(min, max) {

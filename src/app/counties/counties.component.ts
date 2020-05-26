@@ -3,9 +3,7 @@ import { Router, NavigationEnd, ActivatedRoute } from '@angular/router';
 
 import { ViewChild } from '@angular/core';
 
-import { DonutChartComponent } from './../donut-chart/donut-chart.component';
 import { ChartControlsService } from '../chart-controls.service';
-import { MatSlideToggleChange } from '@angular/material/slide-toggle';
 import { Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { CountiesMapComponent } from '../counties-map/counties-map.component';
@@ -79,10 +77,6 @@ export class CountiesComponent implements OnInit, OnDestroy, AfterContentInit {
 
   navigateRight() {
     this.router.navigate(['/status']);
-  }
-
-  toggleData(event: MatSlideToggleChange) {
-    this.chartControlsService.showData = event.checked;
   }
 
 

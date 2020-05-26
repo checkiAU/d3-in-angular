@@ -1,16 +1,14 @@
-<mat-card class="container">
-    <mat-card-title class="title">
-        <mat-icon (click)="navigateLeft()" class="left">keyboard_arrow_left</mat-icon>
-        <div>Cases in the United States</div>
-        <mat-icon (click)="navigateRight()" class="right">keyboard_arrow_right</mat-icon>
-    </mat-card-title>
-    <mat-card-content id="ordersByStatus" #ordersByStatus>
-        <div id="chartAndDataContainer">
-            <div id="chartContainer" [ngClass]="{'half': chartControlsService.showData}">
-                <app-unitedstates-map #ordersByStatusChart [data]="chartData"></app-unitedstates-map>
-            </div>
-  
-        </div>
-     
-    </mat-card-content>
-</mat-card>
+<div class="container">
+  <div class="title">
+    <div class="left"></div>
+    <div>Cases in the United States</div>
+    <div class="right"></div>
+  </div>
+  <div id="ordersByStatus" #ordersByStatus>
+    <div id="chartAndDataContainer">
+      <div id="chartContainer" [ngClass]="{'half': chartControlsService.showData}">
+        <app-unitedstates-map #ordersByStatusChart [data]="chartData"></app-unitedstates-map>
+      </div>
+    </div>
+  </div>
+</div>

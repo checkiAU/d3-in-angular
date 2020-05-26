@@ -1,14 +1,14 @@
-<mat-card class="container">
-    <mat-card-title class="title">
-        <mat-icon (click)="navigateLeft()" class="left">keyboard_arrow_left</mat-icon>
-        <div>Cases in {{selectedState}} By County</div>
-        <mat-icon (click)="navigateRight()" class="right"></mat-icon>
-    </mat-card-title>
-    <mat-card-content id="ordersByStatus" #ordersByStatus>
+<div class="container">
+  <div class="title">
+    <div class="left"><span class="k-icon k-i-arrow-chevron-left" style="font-size: 32px;" (click)="navigateLeft()"></span></div>
+    <div>Cases in {{selectedState}} By County</div>
+    <div class="right"></div>
+  </div>
+    <div id="ordersByStatus" #ordersByStatus>
         <div id="chartAndDataContainer">
             <div id="chartContainer" [ngClass]="{'half': chartControlsService.showData}">
                 <app-counties-map #countiesMap  ></app-counties-map>
             </div>
         </div>
-    </mat-card-content>
-</mat-card>
+    </div>
+</div>
