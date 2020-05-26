@@ -3,10 +3,9 @@ import { Router } from '@angular/router';
 
 import { ViewChild } from '@angular/core';
 
-import { DonutChartComponent } from './../donut-chart/donut-chart.component';
-
 import { ChartControlsService } from '../chart-controls.service';
 import { MatSlideToggleChange } from '@angular/material/slide-toggle';
+import { UnitedStatesMapComponent } from '../unitedstates-map/unitedstates-map.component';
 
  
 @Component({
@@ -16,7 +15,7 @@ import { MatSlideToggleChange } from '@angular/material/slide-toggle';
 })
 export class UnitedStatesComponent implements OnInit, OnDestroy, AfterContentInit {
 
-  @ViewChild('ordersByStatusChart', { static: true }) chart: DonutChartComponent;
+  @ViewChild('UnitedStatesMapComponent', { static: true }) map: UnitedStatesMapComponent;
 
  
   chartData: number[] = [];
@@ -37,10 +36,8 @@ export class UnitedStatesComponent implements OnInit, OnDestroy, AfterContentIni
     if (this.refreshInterval) {
       clearInterval(this.refreshInterval);
     }
-    this.chart.data = [...this.chartData];
     this.refreshInterval = setInterval(() => {
       if (document.hasFocus()) {
-        this.chart.data = [...this.chartData];
       }
     }, 1000);
 

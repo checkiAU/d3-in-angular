@@ -43,7 +43,8 @@ export class UnitedStatesMapComponent implements OnInit {
   height = 500;
 
   public scaleButtons = [
-    { text: "Linear", selected: true },
+    { text: "Sqrrt", selected: true },
+    { text: "Linear" },
     { text: "Exponential" },
     { text: "Logarithmic" }
   ];
@@ -67,7 +68,7 @@ export class UnitedStatesMapComponent implements OnInit {
   legendBoxSettings = {
     width: 50,
     height: 15,
-    y: this.legendContainerSettings.y + 55
+    y: this.legendContainerSettings.y + 38
   };
 
   zoomSettings = {
@@ -79,7 +80,7 @@ export class UnitedStatesMapComponent implements OnInit {
   formatDecimal = d3.format(",.0f");
   legendContainer;
 
-  legendData = [0, 0.2, 0.4, 0.6, 0.8, 1];
+  legendData = [0.2, 0.4, 0.6, 0.8, 1];
 
   states: any[] = [];
   covid: any[] = [];
@@ -90,13 +91,13 @@ export class UnitedStatesMapComponent implements OnInit {
 
   legendLabels: any[] = [];
   meanCases;
-  scaleCircle;
+
 
   numBars = 6;
   start = 1;
   end;
 
-  scale = "Linear";
+  scale = "Sqrrt";
   type = "Filled";
   linearScale;
   colorScaleLinear;
@@ -104,6 +105,8 @@ export class UnitedStatesMapComponent implements OnInit {
   colorScaleExp;
   logScale;
   colorScaleLog;
+  sqrtScale;
+  colorScaleSqrt;
 
   private _routerSub = Subscription.EMPTY;
 
@@ -130,12 +133,20 @@ export class UnitedStatesMapComponent implements OnInit {
       .subscribe((event: NavigationEnd) => {
         this.route.params.subscribe(params => {
           if (this.route.snapshot.params['selectedType']) {
+            var button = this.typeButtons.find(({ text }) => text === this.type);
+            button.selected = false;
             this.type = this.route.snapshot.params['selectedType'];
+            var button = this.typeButtons.find(({ text }) => text === this.type);
+            button.selected = true;
           }
           if (this.route.snapshot.params['selectedScale']) {
+            var button = this.scaleButtons.find(({ text }) => text === this.scale);
+            button.selected = false;
             this.scale = this.route.snapshot.params['selectedScale'];
+            var button = this.scaleButtons.find(({ text }) => text === this.scale);
+            button.selected = true;
           }
-          
+
           if (this.router.url.indexOf('/unitedstates') != -1 || this.router.url === "/") {
             this.removeExistingMapFromParent();
             this.updateMap();
@@ -200,7 +211,6 @@ export class UnitedStatesMapComponent implements OnInit {
 
     that.covid = coviddata.states;
 
-
     that.states = statesdata.features;
 
     that.merged = that.join(that.covid, that.states, "state", "name", function (
@@ -216,10 +226,6 @@ export class UnitedStatesMapComponent implements OnInit {
       };
     });
 
-    var meanCases = d3.mean(that.merged, function (d: any) {
-      return d.cases;
-    });
-
     that.start = d3.min(that.merged, function (d: any) {
       return d.cases;
     });
@@ -229,48 +235,101 @@ export class UnitedStatesMapComponent implements OnInit {
     });
 
     // Linear Scale
-    that.linearScale = d3.scaleLinear()
-      .domain([that.start, that.end])
-      .range([0, 1]);
+    switch (that.type) {
+      case "Filled":
+        that.linearScale = d3.scaleLinear()
+          .domain([that.start, that.end])
+          .range([0, 1]);
+        break;
+      case "Bubble":
+        that.linearScale = d3.scaleLinear()
+          .domain([that.start, that.end])
+          .range([0, 30]);
+        break;
+    }
 
     that.colorScaleLinear = d3.scaleSequential(d =>
       d3.interpolateReds(that.linearScale(d))
     );
 
-
-
-    that.scaleCircle = d3.scaleSqrt()
-      .domain([that.start, that.end])
-      .range([.1, 30]);
-
-
-
     // Exponential Scale
-    that.expScale = d3
-      .scalePow()
-      .exponent(Math.E)
-      .domain([that.start, meanCases])
-      .range([0, 1]);
+    switch (that.type) {
+      case "Filled":
+        that.expScale = d3
+          .scalePow()
+          .exponent(Math.E)
+          .domain([that.start, that.end])
+          .range([0, 1]);
+
+        break;
+      case "Bubble":
+        that.expScale = d3
+          .scalePow()
+          .exponent(Math.E)
+          .domain([that.start, that.end])
+          .range([0, 30]);
+        break;
+    }
+
     that.colorScaleExp = d3.scaleSequential(d =>
       d3.interpolateReds(that.expScale(d))
     );
 
     // Log Scale
-    that.logScale = d3.scaleLog().domain([that.start, that.end])
-      .range([0, 1]);
+    switch (that.type) {
+      case "Filled":
+        that.logScale = d3.scaleLog().domain([that.start, that.end])
+          .range([0, 1]);
+        break;
+      case "Bubble":
+        that.logScale = d3.scaleLog().domain([that.start, that.end])
+          .range([0, 30]);
+        break;
+    }
+
     that.colorScaleLog = d3.scaleSequential(d =>
       d3.interpolateReds(that.logScale(d))
     );
 
+    // Sqrt Scale
+    switch (that.type) {
+      case "Filled":
+        that.sqrtScale = d3.scaleSqrt().domain([that.start, that.end])
+          .range([.1, 1]);
+        break;
+      case "Bubble":
+        that.sqrtScale = d3.scaleSqrt().domain([that.start, that.end])
+          .range([.1, 30]);
+        break;
+    }
 
-    that.legendLabels = [
-      "<" + that.getCases(0),
-      ">" + that.getCases(0),
-      ">" + that.getCases(0.2),
-      ">" + that.getCases(0.4),
-      ">" + that.getCases(0.6),
-      ">" + that.getCases(0.8)
-    ];
+    that.colorScaleSqrt = d3.scaleSequential(d =>
+      d3.interpolateReds(that.sqrtScale(d))
+    );
+
+
+
+    switch (that.type) {
+      case "Filled":
+        that.legendLabels = [
+          ">" + that.getCases(0),
+          ">" + that.getCases(0.2),
+          ">" + that.getCases(0.4),
+          ">" + that.getCases(0.6),
+          ">" + that.getCases(0.8)
+        ];
+        break;
+      case "Bubble":
+        that.legendLabels = [
+          ">" + that.getCases(0 * 30),
+          ">" + that.getCases(0.2 * 30),
+          ">" + that.getCases(0.4 * 30),
+          ">" + that.getCases(0.6 * 30),
+          ">" + that.getCases(0.8 * 30)
+        ];
+        break;
+    }
+
 
     that.g
       .attr("class", "county")
@@ -299,6 +358,8 @@ export class UnitedStatesMapComponent implements OnInit {
               return that.colorScaleExp(cases);
             case "Logarithmic":
               return that.colorScaleLog(cases);
+            case "Sqrrt":
+              return that.colorScaleSqrt(cases);
           }
         }
         else {
@@ -336,8 +397,27 @@ export class UnitedStatesMapComponent implements OnInit {
         .selectAll('circle')
         .data(that.merged)
         .enter().append("circle")
-        .attr("transform", function (d) { return "translate(" + that.path.centroid(d) + ")"; })
-        .attr("r", function (d) { return that.scaleCircle(d.cases) })
+        .attr("transform", function (d) {
+          var t = that.path.centroid(d);
+          if (t[0] > 0 && t[1] > 0) {
+            return "translate(" + t[0] + "," + t[1] + ")";
+          }
+          else {
+            return "";
+          }
+        })
+        .attr("r", function (d) {
+          switch (that.scale) {
+            case "Linear":
+              return that.linearScale(d.cases);
+            case "Exponential":
+              return that.expScale(d.cases);
+            case "Logarithmic":
+              return that.logScale(d.cases);
+            case "Sqrrt":
+              return that.sqrtScale(d.cases);
+          }
+        })
         .on("click", function (d) {
           that.clicked(d, that, this);
         })
@@ -359,10 +439,7 @@ export class UnitedStatesMapComponent implements OnInit {
 
           that.changeDetectorRef.detectChanges();;
         });
-
     }
-
-
 
     that.legendContainer = that.svg
       .append("rect")
@@ -379,50 +456,99 @@ export class UnitedStatesMapComponent implements OnInit {
       .data(that.legendData)
       .enter()
       .append("g")
-      .attr("class", "legend");
+      .attr("class", "legend")
 
-    legend
-      .append("rect")
-      .attr("x", function (d, i) {
-        return (
-          that.legendContainerSettings.x + that.legendBoxSettings.width * i + 20
-        );
-      })
-      .attr("y", that.legendBoxSettings.y)
-      .attr("width", that.legendBoxSettings.width)
-      .attr("height", that.legendBoxSettings.height)
-      .style("fill", function (d, i) {
-        switch (that.scale) {
-          case "Linear":
-            return that.colorScaleLinear(that.linearScale.invert(d));
-          case "Exponential":
-            return that.colorScaleExp(that.expScale.invert(d));
-          case "Logarithmic":
-            return that.colorScaleLog(that.logScale.invert(d));
-        }
-      })
-      .style("opacity", 1);
+    if (that.type == 'Filled') {
+      legend
+        .append("rect")
+        .attr("x", function (d, i) {
+          return (
+            that.legendContainerSettings.x + that.legendBoxSettings.width * i + 20
+          );
+        })
+        .attr("y", that.legendBoxSettings.y)
+        .attr("width", that.legendBoxSettings.width)
+        .attr("height", that.legendBoxSettings.height)
+        .style("fill", function (d, i) {
+          switch (that.scale) {
+            case "Linear":
+              return that.colorScaleLinear(that.linearScale.invert(d));
+            case "Exponential":
+              return that.colorScaleExp(that.expScale.invert(d));
+            case "Logarithmic":
+              return that.colorScaleLog(that.logScale.invert(d));
+            case "Sqrrt":
+              return that.colorScaleSqrt(that.sqrtScale.invert(d));
+          }
+        })
+        .style("opacity", 1);
 
-    legend
-      .append("text")
-      .attr("x", function (d, i) {
-        return (
-          that.legendContainerSettings.x + that.legendBoxSettings.width * i + 30
-        );
-      })
-      .attr("y", that.legendContainerSettings.y + 52)
-      .style("font-size", 12)
-      .text(function (d, i) {
-        return that.legendLabels[i];
-      });
+      legend
+        .append("text")
+        .attr("x", function (d, i) {
+          return (
+            that.legendContainerSettings.x + that.legendBoxSettings.width * i + 30
+          );
+        })
+        .attr("y", that.legendContainerSettings.y + 72)
+        .style("font-size", 12)
+        .text(function (d, i) {
+          return that.legendLabels[i];
+        });
+
+
+    }
+
+
+
+    if (that.type == 'Bubble') {
+      legend
+        .append("circle")
+        .attr("class", "bubble")
+        .attr("cx", function (d, i) {
+          return (
+            that.legendContainerSettings.x + (that.legendBoxSettings.width + 20) * i + 20
+          );
+        })
+        .attr("cy", that.legendBoxSettings.y)
+        .attr("r", function (d, i) {
+          d = d * 30;
+          switch (that.scale) {
+            case "Linear":
+              return that.linearScale(that.linearScale.invert(d));
+            case "Exponential":
+              return that.expScale(that.expScale.invert(d));
+            case "Logarithmic":
+              return that.logScale(that.logScale.invert(d));
+            case "Sqrrt":
+              return that.sqrtScale(that.sqrtScale.invert(d));
+          }
+        })
+
+      legend
+        .append("text")
+        .attr("x", function (d, i) {
+          return (
+            that.legendContainerSettings.x + (that.legendBoxSettings.width + 20) * i + 30
+          );
+        })
+        .attr("y", that.legendContainerSettings.y + 72)
+        .style("font-size", 12)
+        .style("font-weight", "bold")
+        .text(function (d, i) {
+          return that.legendLabels[i];
+        });
+    }
+
 
     legend
       .append("text")
       .attr("x", that.legendContainerSettings.x + 13)
-      .attr("y", that.legendContainerSettings.y + 29)
+      .attr("y", that.legendContainerSettings.y + 14)
       .style("font-size", 14)
       .style("font-weight", "bold")
       .text("COVID-19 Cases by State (" + that.scale + ")");
+
 
   }
 
@@ -434,6 +560,8 @@ export class UnitedStatesMapComponent implements OnInit {
         return this.formatDecimal(this.expScale.invert(rangeValue));
       case "Logarithmic":
         return this.formatDecimal(this.logScale.invert(rangeValue));
+      case "Sqrrt":
+        return this.formatDecimal(this.sqrtScale.invert(rangeValue));
     }
 
   }
