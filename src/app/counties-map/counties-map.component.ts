@@ -73,11 +73,19 @@ export class CountiesMapComponent implements OnInit {
   legendLabels: any[] = [];
   meanCases;
   scaleCases;
+  scaleCircle;
   selectedState;
 
-
-  color = d3.scaleSequential(d3.interpolateReds);
-
+   numBars = 6;
+  start = 0;
+  end;
+  scale = "Linear";
+  linearScale;
+  colorScaleLinear;
+  expScale;
+  colorScaleExp;
+  logScale;
+  colorScaleLog;
 
   private _routerSub = Subscription.EMPTY;
 
@@ -161,18 +169,22 @@ export class CountiesMapComponent implements OnInit {
 
     this.g = this.svg.append('g');
 
-    //d3.csv("./assets/us-counties.csv")
-    //  .then(function (data) {
     that.covid = coviddata.counties;
     //  });
 
-    //d3.json("./assets/counties.json")
-    //   .then(function (countiesdata) {
-    //var data : any = countiesdata.;
-    //that.counties = topojson.feature(data, data.objects.collection).features;
-    debugger;
     that.counties = topojson.feature(countiesdata, countiesdata.objects.collection).features;
- 
+
+
+    if (that.selectedState != 'All') {
+      that.counties = that.counties.filter(function (d) { return d.properties.state === that.selectedState });
+
+      if (that.drillDownService.x) {
+        that.svg.transition()
+          .duration(750)
+          .call(that.zoom.transform, d3.zoomIdentity.translate(that.drillDownService.x, that.drillDownService.y).scale(that.drillDownService.scale))
+      }
+    }
+
     that.merged = that.join(that.covid, that.counties, "fips", "fips", function (county, covid) {
       return {
         name: county.properties.name,
@@ -183,25 +195,63 @@ export class CountiesMapComponent implements OnInit {
       };
     });
 
-    debugger;
+    that.merged = that.merged.sort((a, b) => a.cases > b.cases ? - 1 : (a.cases < b.cases ? 1  : 0));
 
-    if (that.selectedState != 'All') {
-      that.merged = that.merged.filter(function (d) { return d.state === that.selectedState });
 
-      if (that.drillDownService.x) {
-        that.svg.transition()
-          .duration(750)
-          .call(that.zoom.transform, d3.zoomIdentity.translate(that.drillDownService.x, that.drillDownService.y).scale(that.drillDownService.scale))
-      }
-    }
 
     var meanCases = d3.mean(that.merged, function (d: any) {
       return d.cases;
     });
 
-    that.scaleCases = d3.scaleQuantize()
-      .domain([0, meanCases])
+    
+    that.end = d3.max(that.merged, function (d: any) {
+      return d.cases;
+    });
+
+
+    // Linear Scale
+    that.linearScale = d3.scaleLinear()
+      .domain([that.start, that.end])
+      .range([0, 1]);
+
+    that.colorScaleLinear = d3.scaleSequential(d =>
+      d3.interpolateReds(that.linearScale(d))
+    );
+
+   
+    that.scaleCases = d3
+      .scaleQuantize()
+      .domain([that.start, that.end])
       .range([0, 0.2, 0.4, 0.6, 0.8, 1]);
+
+
+    if (that.selectedState == 'All') {
+      that.scaleCircle = d3.scaleSqrt()
+        .domain([that.start, that.end])
+        .range([.1, 30]);
+    }
+    else {
+      that.scaleCircle = d3.scaleSqrt()
+        .domain([that.start, that.end])
+        .range([.1, 10]);
+    }
+
+    // Exponential Scale
+    that.expScale = d3
+      .scalePow()
+      .exponent(Math.E)
+      .domain([that.start, meanCases]);
+    that.colorScaleExp = d3.scaleSequential(d =>
+      d3.interpolateReds(that.expScale(d))
+    );
+
+    // Log Scale
+    that.logScale = d3.scaleLog().domain([that.start, that.end]);
+    that.colorScaleLog = d3.scaleSequential(d =>
+      d3.interpolateReds(that.logScale(d))
+    );
+ 
+
 
     that.legendLabels = [
       '<' + that.getCases(0),
@@ -219,9 +269,7 @@ export class CountiesMapComponent implements OnInit {
       .data(that.merged)
       .enter()
       .append('path')
-
       .attr('d', that.path)
-
       .attr('class', 'county')
       .attr('stroke', 'grey')
       .attr('stroke-width', 0.3)
@@ -229,7 +277,7 @@ export class CountiesMapComponent implements OnInit {
       .attr('fill', function (d) {
         var cases = d.cases;
         var cases = cases ? cases : 0;
-        return that.color(that.scaleCases(cases))
+        return that.colorScaleLinear(cases)
       })
       //.on('click', function (d) {
       //  that.clicked(d, that);
@@ -251,7 +299,36 @@ export class CountiesMapComponent implements OnInit {
           .style('opacity', 0);
 
         that.changeDetectorRef.detectChanges();;
-      });;
+      });
+
+    if (1 == 1) {
+    that.g
+      .attr("class", "bubble")
+      .selectAll('circle')
+      .data(that.merged)
+      .enter().append("circle")
+      .attr("transform", function (d) { return "translate(" + that.path.centroid(d) + ")"; })
+      .attr("r", function (d) { return that.scaleCircle(d.cases)})
+      .on('mouseover', function (d) {
+           that.tooltip.transition()
+             .duration(200)
+             .style('opacity', .9);
+
+           that.tooltip.html(d.name + '<br/><b>Total Cases:</b> ' + that.formatDecimal(d.cases))
+             .style('left', (d3.event.pageX) + 'px')
+             .style('top', (d3.event.pageY) + 'px')
+
+           that.changeDetectorRef.detectChanges();;
+         })
+      .on('mouseout', function (d) {
+        that.tooltip.transition()
+          .duration(300)
+          .style('opacity', 0);
+
+        that.changeDetectorRef.detectChanges();;
+      });
+
+    }
 
     that.legendContainer = that.svg.append('rect')
       .attr('x', that.legendContainerSettings.x)
@@ -277,7 +354,7 @@ export class CountiesMapComponent implements OnInit {
       .attr('height', that.legendBoxSettings.height)
       .style(
         'fill', function (d, i) {
-          return that.color(d);
+          return that.colorScaleLinear(d);
         })
       .style(
         'opacity', 1)
@@ -302,9 +379,8 @@ export class CountiesMapComponent implements OnInit {
         'font-size', 14)
       .style(
         'font-weight', 'bold')
-      .text('Population Cases by County');
+      .text('COVID-19 Cases by County');
 
-    //});
   }
 
   getCases(rangeValue) {

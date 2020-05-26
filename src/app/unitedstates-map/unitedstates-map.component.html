@@ -1,16 +1,33 @@
 <div class="container">
   <div class="row">
     <div class="col-md-12">
-      <p>Scale:</p>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-4">
       <kendo-buttongroup [selection]="'single'">
-        <button *ngFor="let button of buttons"
+        <button *ngFor="let button of scaleButtons"
                 kendoButton
                 [toggleable]="true"
                 [selected]="button.selected"
-                    (selectedChange)="selectedChange($event, button)"
-           >
+                (selectedChange)="selectedScaleChange($event, button)">
           <span>
-     
+            {{ button.text }}
+          </span>
+        </button>
+      </kendo-buttongroup>
+    </div>
+    <div class="col-md-4">
+    </div>
+    <div class="col-md-4">
+      <kendo-buttongroup [selection]="'single'">
+        <button *ngFor="let button of typeButtons"
+                kendoButton
+                [toggleable]="true"
+                [selected]="button.selected"
+                (selectedChange)="selectedTypeChange($event, button)">
+          <span>
             {{ button.text }}
           </span>
         </button>
@@ -24,5 +41,5 @@
     </div>
   </div>
 </div>
- 
+
 

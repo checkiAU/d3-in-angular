@@ -12,6 +12,8 @@ import {
 import * as statesdata from "./states.json";
 import * as coviddata from "./states-covid.json";
 import * as d3 from "d3";
+import legend from 'd3-svg-legend'
+
 
 import { Subscription } from "rxjs";
 import { Router, NavigationEnd, ActivatedRoute } from "@angular/router";
@@ -40,10 +42,15 @@ export class UnitedStatesMapComponent implements OnInit {
   width = 960;
   height = 500;
 
-  public buttons = [
+  public scaleButtons = [
     { text: "Linear", selected: true },
     { text: "Exponential" },
     { text: "Logarithmic" }
+  ];
+
+  public typeButtons = [
+    { text: "Filled", selected: true },
+    { text: "Bubble" }
   ];
 
   centered;
@@ -83,13 +90,15 @@ export class UnitedStatesMapComponent implements OnInit {
 
   legendLabels: any[] = [];
   meanCases;
-  scaleCases;
+  scaleCircle;
 
   numBars = 6;
   start = 1;
   end;
 
   scale = "Linear";
+  type = "Filled";
+  linearScale;
   colorScaleLinear;
   expScale;
   colorScaleExp;
@@ -179,14 +188,8 @@ export class UnitedStatesMapComponent implements OnInit {
 
     that.g = this.svg.append("g");
 
-    //d3.csv("us-states.csv")
-    //  .then(function (data) {
-
-    //d3.csvParse()
     that.covid = coviddata.states;
 
-    //d3.json("states.json")
-    //  .then(function (data) {
 
     that.states = statesdata.features;
 
@@ -207,32 +210,48 @@ export class UnitedStatesMapComponent implements OnInit {
       return d.cases;
     });
 
+    that.start = d3.min(that.merged, function (d: any) {
+      return d.cases;
+    });
+
     that.end = d3.max(that.merged, function (d: any) {
       return d.cases;
     });
 
     // Linear Scale
-    that.colorScaleLinear = d3.scaleSequential(d3.interpolateReds);
+    that.linearScale = d3.scaleLinear()
+      .domain([that.start, that.end])
+      .range([0, 1]);
+
+    that.colorScaleLinear = d3.scaleSequential(d =>
+      d3.interpolateReds(that.linearScale(d))
+    );
+
+
+
+    that.scaleCircle = d3.scaleSqrt()
+      .domain([that.start, that.end])
+      .range([.1, 30]);
+
+
 
     // Exponential Scale
     that.expScale = d3
       .scalePow()
       .exponent(Math.E)
-      .domain([that.start, that.end]);
+      .domain([that.start, meanCases])
+      .range([0, 1]);
     that.colorScaleExp = d3.scaleSequential(d =>
       d3.interpolateReds(that.expScale(d))
     );
 
     // Log Scale
-    that.logScale = d3.scaleLog().domain([that.start, that.end]);
+    that.logScale = d3.scaleLog().domain([that.start, that.end])
+      .range([0, 1]);
     that.colorScaleLog = d3.scaleSequential(d =>
       d3.interpolateReds(that.logScale(d))
     );
 
-    that.scaleCases = d3
-      .scaleQuantize()
-      .domain([0, meanCases])
-      .range([0, 0.2, 0.4, 0.6, 0.8, 1]);
 
     that.legendLabels = [
       "<" + that.getCases(0),
@@ -262,14 +281,18 @@ export class UnitedStatesMapComponent implements OnInit {
       .attr("fill", function (d) {
         var cases = d.cases;
         var cases = cases ? cases : 0;
-
-        switch (that.scale) {
-          case "Linear":
-            return that.colorScaleLinear(that.scaleCases(cases));
-          case "Exponential":
-            return that.colorScaleExp(cases);
-          case "Logarithmic":
-            return that.colorScaleLog(cases);
+        if (that.type == "Filled") {
+          switch (that.scale) {
+            case "Linear":
+              return that.colorScaleLinear(cases);
+            case "Exponential":
+              return that.colorScaleExp(cases);
+            case "Logarithmic":
+              return that.colorScaleLog(cases);
+          }
+        }
+        else {
+          return "#f2f2f2";
         }
       })
       .on("mouseover", function (d) {
@@ -295,6 +318,39 @@ export class UnitedStatesMapComponent implements OnInit {
 
         that.changeDetectorRef.detectChanges();
       });
+
+
+    if (that.type == "Bubble") {
+      that.g
+        .attr("class", "bubble")
+        .selectAll('circle')
+        .data(that.merged)
+        .enter().append("circle")
+        .attr("transform", function (d) { return "translate(" + that.path.centroid(d) + ")"; })
+        .attr("r", function (d) { return that.scaleCircle(d.cases) })
+        .on("click", function (d) {
+          that.clicked(d, that, this);
+        })
+        .on('mouseover', function (d) {
+          that.tooltip.transition()
+            .duration(200)
+            .style('opacity', .9);
+
+          that.tooltip.html(d.name + '<br/><b>Total Cases:</b> ' + that.formatDecimal(d.cases))
+            .style('left', (d3.event.pageX) + 'px')
+            .style('top', (d3.event.pageY) + 'px')
+
+          that.changeDetectorRef.detectChanges();;
+        })
+        .on('mouseout', function (d) {
+          that.tooltip.transition()
+            .duration(300)
+            .style('opacity', 0);
+
+          that.changeDetectorRef.detectChanges();;
+        });
+
+    }
 
     that.legendContainer = that.svg
       .append("rect")
@@ -326,11 +382,11 @@ export class UnitedStatesMapComponent implements OnInit {
       .style("fill", function (d, i) {
         switch (that.scale) {
           case "Linear":
-            return that.colorScaleLinear(d);
+            return that.colorScaleLinear(that.linearScale.invert(d));
           case "Exponential":
-            return that.colorScaleExp(d);
+            return that.colorScaleExp(that.expScale.invert(d));
           case "Logarithmic":
-            return that.colorScaleLog(d);
+            return that.colorScaleLog(that.logScale.invert(d));
         }
       })
       .style("opacity", 1);
@@ -356,12 +412,18 @@ export class UnitedStatesMapComponent implements OnInit {
       .style("font-weight", "bold")
       .text("COVID-19 Cases by State (" + that.scale + ")");
 
-    //    });
-    //});
   }
 
   getCases(rangeValue) {
-    return this.formatDecimal(this.scaleCases.invertExtent(rangeValue)[1]);
+    switch (this.scale) {
+      case "Linear":
+        return this.formatDecimal(this.linearScale.invert(rangeValue));
+      case "Exponential":
+        return this.formatDecimal(this.expScale.invert(rangeValue));
+      case "Logarithmic":
+        return this.formatDecimal(this.logScale.invert(rangeValue));
+    }
+
   }
 
   reset(d, p) {
@@ -450,8 +512,14 @@ export class UnitedStatesMapComponent implements OnInit {
     return output;
   }
 
-  selectedChange(e, btn) {
+  selectedScaleChange(e, btn) {
     this.scale = btn.text;
+    this.removeExistingMapFromParent();
+    this.updateMap();
+  }
+
+  selectedTypeChange(e, btn) {
+    this.type = btn.text;
     this.removeExistingMapFromParent();
     this.updateMap();
   }
