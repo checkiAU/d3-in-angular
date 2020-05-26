@@ -1,4 +1,4 @@
-# Building Reactive Maps and Charts in Angular 9 using D3
+# Tracking Covid Data with Reactive Maps and Charts in Angular 9 using D3
 
 This projects shows how to build reactive maps and charts inside an Angular 9 application using the D3 JavaScript framework.
 
