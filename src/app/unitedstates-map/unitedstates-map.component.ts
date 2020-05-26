@@ -68,8 +68,9 @@ export class UnitedStatesMapComponent implements OnInit {
   legendBoxSettings = {
     width: 50,
     height: 15,
-    y: this.legendContainerSettings.y + 38
+    y: this.legendContainerSettings.y + 35
   };
+
 
   zoomSettings = {
     duration: 1000,
@@ -496,10 +497,7 @@ export class UnitedStatesMapComponent implements OnInit {
           return that.legendLabels[i];
         });
 
-
     }
-
-
 
     if (that.type == 'Bubble') {
       legend
@@ -540,7 +538,6 @@ export class UnitedStatesMapComponent implements OnInit {
         });
     }
 
-
     legend
       .append("text")
       .attr("x", that.legendContainerSettings.x + 13)
@@ -548,7 +545,6 @@ export class UnitedStatesMapComponent implements OnInit {
       .style("font-size", 14)
       .style("font-weight", "bold")
       .text("COVID-19 Cases by State (" + that.scale + ")");
-
 
   }
 

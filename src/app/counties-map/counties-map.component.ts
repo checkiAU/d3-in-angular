@@ -50,7 +50,7 @@ export class CountiesMapComponent implements OnInit {
   legendBoxSettings = {
     width: 50,
     height: 15,
-    y: this.legendContainerSettings.y + 55
+    y: this.legendContainerSettings.y + 35
   };
 
   zoom;
@@ -65,7 +65,7 @@ export class CountiesMapComponent implements OnInit {
   formatDecimal = d3.format(',.0f');
   legendContainer;
 
-  legendData = [0, 0.2, 0.4, 0.6, 0.8, 1];
+  legendData = [ 0.2, 0.4, 0.6, 0.8, 1];
 
   merged: any[] = [];
   covid: any[] = [];
@@ -249,7 +249,7 @@ export class CountiesMapComponent implements OnInit {
       case "Bubble":
         that.linearScale = d3.scaleLinear()
           .domain([that.start, that.end])
-          .range([0, 10]);
+          .range([0, 8]);
         break;
     }
 
@@ -271,7 +271,7 @@ export class CountiesMapComponent implements OnInit {
           .scalePow()
           .exponent(Math.E)
           .domain([that.start, that.end])
-          .range([0, 10]);
+          .range([0, 8]);
         break;
     }
 
@@ -287,7 +287,7 @@ export class CountiesMapComponent implements OnInit {
         break;
       case "Bubble":
         that.logScale = d3.scaleLog().domain([that.start, that.end])
-          .range([0, 10]);
+          .range([0, 8]);
         break;
     }
 
@@ -303,7 +303,7 @@ export class CountiesMapComponent implements OnInit {
         break;
       case "Bubble":
         that.sqrtScale = d3.scaleSqrt().domain([that.start, that.end])
-          .range([.1, 10]);
+          .range([.1, 8]);
         break;
     }
 
@@ -311,17 +311,26 @@ export class CountiesMapComponent implements OnInit {
       d3.interpolateReds(that.sqrtScale(d))
     );
  
-
-
-    that.legendLabels = [
-      '<' + that.getCases(0),
-      '>' + that.getCases(0),
-      '>' + that.getCases(0.2),
-      '>' + that.getCases(0.4),
-      '>' + that.getCases(0.6),
-      '>' + that.getCases(0.8)
-    ];
-
+    switch (that.type) {
+      case "Filled":
+        that.legendLabels = [
+          ">" + that.getCases(0),
+          ">" + that.getCases(0.2),
+          ">" + that.getCases(0.4),
+          ">" + that.getCases(0.6),
+          ">" + that.getCases(0.8)
+        ];
+        break;
+      case "Bubble":
+        that.legendLabels = [
+          ">" + that.getCases(0 * 30),
+          ">" + that.getCases(0.2 * 30),
+          ">" + that.getCases(0.4 * 30),
+          ">" + that.getCases(0.6 * 30),
+          ">" + that.getCases(0.8 * 30)
+        ];
+        break;
+    }
 
     that.g
       .attr('class', 'county')
@@ -429,17 +438,18 @@ export class CountiesMapComponent implements OnInit {
       .enter().append('g')
       .attr('class', 'legend');
 
-
-    legend.append('rect')
-      .attr(
-        'x', function (d, i) {
-          return that.legendContainerSettings.x + that.legendBoxSettings.width * i + 20;
+    if (that.type == 'Filled') {
+      legend
+        .append("rect")
+        .attr("x", function (d, i) {
+          return (
+            that.legendContainerSettings.x + that.legendBoxSettings.width * i + 20
+          );
         })
-      .attr('y', that.legendBoxSettings.y)
-      .attr('width', that.legendBoxSettings.width)
-      .attr('height', that.legendBoxSettings.height)
-      .style(
-        'fill', function (d, i) {
+        .attr("y", that.legendBoxSettings.y)
+        .attr("width", that.legendBoxSettings.width)
+        .attr("height", that.legendBoxSettings.height)
+        .style("fill", function (d, i) {
           switch (that.scale) {
             case "Linear":
               return that.colorScaleLinear(that.linearScale.invert(d));
@@ -451,30 +461,68 @@ export class CountiesMapComponent implements OnInit {
               return that.colorScaleSqrt(that.sqrtScale.invert(d));
           }
         })
-      .style(
-        'opacity', 1)
+        .style("opacity", 1);
 
-    legend.append('text')
-      .attr(
-        'x', function (d, i) {
-          return that.legendContainerSettings.x + that.legendBoxSettings.width * i + 30;
+      legend
+        .append("text")
+        .attr("x", function (d, i) {
+          return (
+            that.legendContainerSettings.x + that.legendBoxSettings.width * i + 30
+          );
         })
-      .attr(
-        'y', that.legendContainerSettings.y + 52
-      )
-      .style('font-size', 12)
-      .text(function (d, i) {
-        return that.legendLabels[i];
-      });
+        .attr("y", that.legendContainerSettings.y + 72)
+        .style("font-size", 12)
+        .text(function (d, i) {
+          return that.legendLabels[i];
+        });
+    }
 
-    legend.append('text')
-      .attr('x', that.legendContainerSettings.x + 13)
-      .attr('y', that.legendContainerSettings.y + 29)
-      .style(
-        'font-size', 14)
-      .style(
-        'font-weight', 'bold')
-      .text('COVID-19 Cases by County (' + that.scale + ")");
+    if (that.type == 'Bubble') {
+      legend
+        .append("circle")
+        .attr("class", "bubble")
+        .attr("cx", function (d, i) {
+          return (
+            that.legendContainerSettings.x + (that.legendBoxSettings.width + 20) * i + 20
+          );
+        })
+        .attr("cy", that.legendBoxSettings.y)
+        .attr("r", function (d, i) {
+          d = d * 30;
+          switch (that.scale) {
+            case "Linear":
+              return that.linearScale(that.linearScale.invert(d));
+            case "Exponential":
+              return that.expScale(that.expScale.invert(d));
+            case "Logarithmic":
+              return that.logScale(that.logScale.invert(d));
+            case "Sqrrt":
+              return that.sqrtScale(that.sqrtScale.invert(d));
+          }
+        })
+
+      legend
+        .append("text")
+        .attr("x", function (d, i) {
+          return (
+            that.legendContainerSettings.x + (that.legendBoxSettings.width + 20) * i + 30
+          );
+        })
+        .attr("y", that.legendContainerSettings.y + 72)
+        .style("font-size", 12)
+        .style("font-weight", "bold")
+        .text(function (d, i) {
+          return that.legendLabels[i];
+        });
+    }
+
+    legend
+      .append("text")
+      .attr("x", that.legendContainerSettings.x + 13)
+      .attr("y", that.legendContainerSettings.y + 14)
+      .style("font-size", 14)
+      .style("font-weight", "bold")
+      .text("COVID-19 Cases by County (" + that.scale + ")");
 
   }
 
