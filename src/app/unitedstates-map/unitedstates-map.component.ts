@@ -630,10 +630,10 @@ export class UnitedStatesMapComponent implements OnInit {
         p.zoom.transform,
         d3.zoomIdentity.translate(translate[0], translate[1]).scale(scale)
       )
-      .on("end", p.drillDown(translate[0], translate[1], scale, d.abbrev, p.type, p.scale)); // updated for d3 v4
+      .on("end", p.drillDown(translate[0], translate[1], scale, d.abbrev, p.type, p.scale, p.metric)); // updated for d3 v4
   }
 
-  drillDown(x, y, scale, state, type, mapScale) {
+  drillDown(x, y, scale, state, type, mapScale, metric) {
     this.drillDownService.scale = scale;
     if (state == "Alaska" || state == "Hawaii") {
       this.drillDownService.x = x - 300;
@@ -642,7 +642,7 @@ export class UnitedStatesMapComponent implements OnInit {
       this.drillDownService.x = x;
       this.drillDownService.y = y;
     }
-    this.router.navigateByUrl("/counties/" + state + "/" + type + "/" + mapScale);
+    this.router.navigateByUrl("/counties/" + state + "/" + type + "/" + mapScale + "/" + metric);
   }
 
   join(lookupTable, mainTable, lookupKey, mainKey, select) {
@@ -666,14 +666,14 @@ export class UnitedStatesMapComponent implements OnInit {
 
   selectedScaleChange(e, btn) {
     this.scale = btn.text;
-    this.location.go('unitedstates/' + this.type + '/' + this.scale);
+    this.location.go('unitedstates/' + this.type + '/' + this.scale + '/' + this.metric);
     this.removeExistingMapFromParent();
     this.updateMap();
   }
 
   selectedTypeChange(e, btn) {
     this.type = btn.text;
-    this.location.go('unitedstates/' + this.type + '/' + this.scale);
+    this.location.go('unitedstates/' + this.type + '/' + this.scale + '/' + this.metric);
     this.removeExistingMapFromParent();
     this.updateMap();
   }

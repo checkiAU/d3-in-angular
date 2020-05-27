@@ -18,7 +18,8 @@ export class CountiesComponent implements OnInit, OnDestroy, AfterContentInit {
   @ViewChild('countiesMap', { static: true }) countiesMap: CountiesMapComponent;
  
   refreshInterval;
-  selectedState = "United States"; 
+  selectedState = "United States";
+  metric = "Cases";
 
   private _routerSub = Subscription.EMPTY;
 
@@ -29,6 +30,13 @@ export class CountiesComponent implements OnInit, OnDestroy, AfterContentInit {
     ).subscribe((event: NavigationEnd) => {
       this.route.params.subscribe(params => {
         this.selectedState = this.route.snapshot.params['selectedState'];
+
+        this.route.params.subscribe(params => {
+          if (this.route.snapshot.params['selectedMetric']) {
+            this.metric = this.route.snapshot.params['selectedMetric'];
+          }
+        });
+
       });
     });
 
@@ -59,7 +67,7 @@ export class CountiesComponent implements OnInit, OnDestroy, AfterContentInit {
   }
 
   navigateLeft() {
-    this.router.navigate(['/unitedstates' + "/" + this.countiesMap.type + "/" + this.countiesMap.scale]);
+    this.router.navigate(['/unitedstates' + "/" + this.countiesMap.type + "/" + this.countiesMap.scale + "/" + this.countiesMap.metric]);
   }
 
   navigateRight() {
