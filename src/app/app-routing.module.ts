@@ -6,7 +6,7 @@ import { CountiesComponent } from './counties/counties.component';
 
 const routes: Routes = [
   { path: 'counties/:selectedState/:selectedType/:selectedScale', component: CountiesComponent },
-  { path: 'unitedstates/:selectedType/:selectedScale', component: UnitedStatesComponent },
+  { path: 'unitedstates/:selectedType/:selectedScale/:selectedMetric', component: UnitedStatesComponent },
   { path: '', component: UnitedStatesComponent }
 ];
 

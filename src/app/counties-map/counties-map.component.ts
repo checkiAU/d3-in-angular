@@ -50,7 +50,7 @@ export class CountiesMapComponent implements OnInit {
   legendBoxSettings = {
     width: 50,
     height: 15,
-    y: this.legendContainerSettings.y + 35
+    y: this.legendContainerSettings.y + 38
   };
 
   zoom;

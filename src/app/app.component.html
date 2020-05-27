@@ -1,8 +1,31 @@
-<div *ngIf="!chartControlsService.fullScreen" class="toolbar" role="banner">
-    <span>COVID-19 Data Tracker</span>
-</div>
-<img *ngIf="!chartControlsService.fullScreen" class="watermark"  />
-<main [@fadeAnimation]="getRouterOutletState(o)">
-  <router-outlet #o="outlet"></router-outlet>
-</main>
+<kendo-drawer-container>
+  <kendo-drawer #drawer
+                [items]="items"
+                [mode]="'push'"
+                [mini]="true"
+                [autoCollapse]="true"
+                [miniWidth]="80"
+                [expanded]="false"
+                (select)="onSelect($event)" [style.display]="isAuthorized ? 'block' : 'none'">
+    >
+    <ng-template kendoDrawerHeaderTemplate>
+      <div *ngIf="!expanded" class="logo"><a class="logolink" [routerLink]="'home'"> COVID </a></div>
+      <div *ngIf="expanded" class="logo"><a class="logolink" [routerLink]="'home'"> COVID &nbsp; Home </a></div>
+      <div>&nbsp;</div>
+    </ng-template>
+    <ng-template kendoDrawerItemTemplate let-item>
+      <a [routerLink]="[item.path]" routerLinkActive="active" routerLinkActiveOptions="{exact: true}" class="drawer-link">
+        <i class="material-icons drawer-icon">{{item.icon}}</i>
+        <p class="drawer-text" *ngIf="expanded">{{ item.text }}</p>
+      </a>
+    </ng-template>
+  </kendo-drawer>
+  <kendo-drawer-content>
+    <nav-menu #navmenu (toggleDrawerEvent)="switchExpanded()"></nav-menu>
+    <div [@routeAnimations]="prepareRoute(outlet)">
+      <router-outlet #outlet="outlet" (activate)="onActivate($event)"></router-outlet>
+    </div>
+  </kendo-drawer-content>
+
+ 
 

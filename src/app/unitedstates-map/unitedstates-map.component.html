@@ -5,7 +5,7 @@
   </div>
 
   <div class="row">
-    <div class="col-md-4">
+    <div class="col-md-6">
       <kendo-buttongroup [selection]="'single'">
         <button *ngFor="let button of typeButtons"
                 kendoButton
@@ -19,11 +19,10 @@
       </kendo-buttongroup>
 
     </div>
-    <div class="col-md-4">
-    </div>
-    <div class="col-md-4">
+ 
+    <div class="col-md-6" >
 
-      <kendo-buttongroup [selection]="'single'">
+      <kendo-buttongroup [selection]="'single'"  >
         <button *ngFor="let button of scaleButtons"
                 kendoButton
                 [toggleable]="true"

@@ -1,0 +1,36 @@
+<nav class="navbar" style="background-color: white;" [ngClass]="{'page-header' : isHome }">
+  <div class="container-fluid">
+    <ul class="nav navbar-nav pull-left" style="max-width:100px;">
+      <li class="nav-item">
+        <div kendoRippleContainer *ngIf="isAuthorized">
+          <button kendoButton class="rounded-button" (click)="toggleDrawer();">
+            <i *ngIf="!expanded" class="material-icons design_bullet-list-67">view_list</i>
+            <i *ngIf="expanded" class="material-icons text_align-center">more_vert</i>
+          </button>
+        </div>
+      </li>
+    </ul>
+    <ul class="nav navbar-nav mx-auto" style="max-width:650px;">
+      <li class="nav-item">
+        <div class="row" style="background-color:none;">
+         
+            <img src="assets/covid.png" class=" float-right" alt="">
+          
+          <div class="col-md pull-left float-left" style="text-align:left">
+            <div class="home-page-title">{{title}}</div>
+            <div style="font-size:18px;font-weight:bold;line-height:24px;margin-top:5px">{{subtitle}}</div>
+          </div>
+        </div>
+      </li>
+    </ul>
+    <ul class="nav navbar-nav pull-right">
+      <li class="nav-item">
+        <div class="wrapperUser" *ngIf="isAuthorized">
+          <div class="user" *ngIf="isAuthorized">
+            <span class="username">Welcome</span>
+           </div>   
+          </div>
+      </li>
+    </ul>
+  </div>
+</nav>

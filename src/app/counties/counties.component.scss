@@ -4,61 +4,89 @@
     align-items: center;
 }
 
-.container {
-    min-width: 350px;
-    width: 60vw;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-evenly;
-    background-color: transparent;
-    .title {
-        display: flex;
-        flex-direction: row;
-        justify-content: space-between;
-        align-items: center;
-        font-size: 2rem;
-        font-family: 'Roboto';
-        height: 2rem;
-        width: 100%;
-        margin: 0 auto 1rem auto;
-
-        .left {
-            height: 3rem;
-            font-size: 3rem;
-            cursor: pointer;
-        }
-        .span {
-            height: 3rem;
-            line-height: 3rem;
-        }
-        .right {
-            height: 3rem;
-            font-size: 3rem;
-            cursor: pointer;
-            margin-right: 20px;
-        }
-    }
-
+.card-container {
+  margin-top: 55px;
+  display: flex;
+  justify-content: space-evenly;
 }
 
 
-mat-option ::ng-deep .city {
-    font-size: 1rem;
-    font-family: 'Roboto';
+.kendo-card {
+  border: 1px solid #122e51;
+  border-radius: 10px;
+  -moz-border-radius: 10px;
+  -webkit-border-radius: 10px;
+  min-height: 320px;
+  min-width: 270px;
 }
 
-@media screen and (max-width: 767px) {
-    .container {
-        .title {
-            font-size: 1.5rem;
-        }
-    }
+.kendo-card:hover {
+  border: 1px solid #0d5277;
+  -webkit-box-shadow: 1px 6px 7px -2px rgba(105,105,105,1);
+  -moz-box-shadow: 1px 6px 7px -2px rgba(105,105,105,1);
+  box-shadow: 1px 6px 7px -2px rgba(105,105,105,1);
+}
+ 
+
+.kendo-card .card-title h4 {
+  font-size: 26px;
+  font-weight: bold;
+  color: #880e47;
+  font-family: 'Roboto', sans-serif;
+  margin-top: -46px;
+  padding-left: 18px;
+  line-height: 1.2;
 }
 
-@media screen and (max-width: 414px) {
-    .container {
-        .title {
-            font-size: 1rem;
-        }
-    }
+.kendo-card img:hover {
+  background: #0d5277;
+  border: 15px solid #0d5277;
 }
+
+.kendo-card ul {
+  padding: 10px 14px;
+}
+
+.kendo-card ul li {
+  list-style: none;
+}
+
+.kendo-card ul li a {
+  font-size: 16px;
+  color: #112e52;
+  text-decoration: underline;
+  padding: 5px;
+  display: inline-block;
+}
+
+.kendo-card ul li a {
+  font-size: 16px;
+  color: #112e52;
+  text-decoration: underline;
+  padding: 5px;
+}
+
+.kendo-card ul li a:hover {
+  /*background: #c3d4dd;*/
+  color: #0D5277;
+  text-decoration: none;
+  padding: 5px;
+}
+
+.kendo-card .material-icons {
+  background: #112E51;
+  padding: 15px;
+  color: #fff;
+  font-size: 30px;
+  border-radius: 10px;
+  -moz-border-radius: 10px;
+  -webkit-border-radius: 10px;
+  position: relative;
+  top: -56px;
+}
+
+
+.kendo-card .material-icons:hover {
+  background: #0D5277;
+}
+

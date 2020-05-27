@@ -1,14 +1,21 @@
-<div class="container">
-  <div class="title">
-    <div class="left"><span class="k-icon k-i-arrow-chevron-left" style="font-size: 32px;" (click)="navigateLeft()"></span></div>
-    <div>Cases in {{selectedState}} By County</div>
-    <div class="right"></div>
-  </div>
-    <div id="ordersByStatus" #ordersByStatus>
-        <div id="chartAndDataContainer">
-            <div id="chartContainer" [ngClass]="{'half': chartControlsService.showData}">
-                <app-counties-map #countiesMap  ></app-counties-map>
+<div class="card-container">
+  <div class="row">
+    <div class="col-md-12">
+      <kendo-card class="kendo-card" style="min-width:1200px">
+        <kendo-card-body>
+          <i class="material-icons">place</i>
+          <div class="container-fluid card-title">
+            <div class="row">                
+              <div class="col-md-12">
+                <h4>  <button kendoButton [icon]="'arrow-chevron-left'" (click)="navigateLeft()"></button> Cases in {{selectedState}} By County</h4>
+              </div>
             </div>
-        </div>
+          </div>
+          <app-counties-map #countiesMap></app-counties-map>
+        </kendo-card-body>
+      </kendo-card>
     </div>
+  </div>
 </div>
+
+

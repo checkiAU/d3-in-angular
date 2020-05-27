@@ -68,7 +68,7 @@ export class UnitedStatesMapComponent implements OnInit {
   legendBoxSettings = {
     width: 50,
     height: 15,
-    y: this.legendContainerSettings.y + 35
+    y: this.legendContainerSettings.y + 38
   };
 
 
@@ -91,8 +91,6 @@ export class UnitedStatesMapComponent implements OnInit {
   active;
 
   legendLabels: any[] = [];
-  meanCases;
-
 
   numBars = 6;
   start = 1;
@@ -100,6 +98,8 @@ export class UnitedStatesMapComponent implements OnInit {
 
   scale = "Sqrrt";
   type = "Filled";
+  metric = "Cases";
+
   linearScale;
   colorScaleLinear;
   expScale;
@@ -133,6 +133,7 @@ export class UnitedStatesMapComponent implements OnInit {
       .pipe(filter(event => event instanceof NavigationEnd))
       .subscribe((event: NavigationEnd) => {
         this.route.params.subscribe(params => {
+
           if (this.route.snapshot.params['selectedType']) {
             var button = this.typeButtons.find(({ text }) => text === this.type);
             button.selected = false;
@@ -140,6 +141,7 @@ export class UnitedStatesMapComponent implements OnInit {
             var button = this.typeButtons.find(({ text }) => text === this.type);
             button.selected = true;
           }
+
           if (this.route.snapshot.params['selectedScale']) {
             var button = this.scaleButtons.find(({ text }) => text === this.scale);
             button.selected = false;
@@ -147,6 +149,10 @@ export class UnitedStatesMapComponent implements OnInit {
             var button = this.scaleButtons.find(({ text }) => text === this.scale);
             button.selected = true;
           }
+
+          if (this.route.snapshot.params['selectedMetric']) {
+            this.metric = this.route.snapshot.params['selectedMetric'];
+           }
 
           if (this.router.url.indexOf('/unitedstates') != -1 || this.router.url === "/") {
             this.removeExistingMapFromParent();
@@ -218,9 +224,19 @@ export class UnitedStatesMapComponent implements OnInit {
       state,
       covid
     ) {
+      var metric;
+      switch (that.metric) {
+        case "Cases":
+          metric = covid ? covid.cases : 0;
+          break;
+        case "Deaths":
+          metric = covid ? covid.deaths : 0;
+          break;
+      }
+
       return {
-        name: state.properties.name,
-        cases: covid ? covid.cases : 0,
+        name: state.properties.name,    
+        metric: metric,
         geometry: state.geometry,
         type: state.type,
         abbrev: covid ? covid.state : 0
@@ -228,11 +244,11 @@ export class UnitedStatesMapComponent implements OnInit {
     });
 
     that.start = d3.min(that.merged, function (d: any) {
-      return d.cases;
+      return d.metric;
     });
 
     that.end = d3.max(that.merged, function (d: any) {
-      return d.cases;
+      return d.metric;
     });
 
     // Linear Scale
@@ -313,20 +329,20 @@ export class UnitedStatesMapComponent implements OnInit {
     switch (that.type) {
       case "Filled":
         that.legendLabels = [
-          ">" + that.getCases(0),
-          ">" + that.getCases(0.2),
-          ">" + that.getCases(0.4),
-          ">" + that.getCases(0.6),
-          ">" + that.getCases(0.8)
+          ">" + that.getMetrics(0),
+          ">" + that.getMetrics(0.2),
+          ">" + that.getMetrics(0.4),
+          ">" + that.getMetrics(0.6),
+          ">" + that.getMetrics(0.8)
         ];
         break;
       case "Bubble":
         that.legendLabels = [
-          ">" + that.getCases(0 * 30),
-          ">" + that.getCases(0.2 * 30),
-          ">" + that.getCases(0.4 * 30),
-          ">" + that.getCases(0.6 * 30),
-          ">" + that.getCases(0.8 * 30)
+          ">" + that.getMetrics(0 * 30),
+          ">" + that.getMetrics(0.2 * 30),
+          ">" + that.getMetrics(0.4 * 30),
+          ">" + that.getMetrics(0.6 * 30),
+          ">" + that.getMetrics(0.8 * 30)
         ];
         break;
     }
@@ -349,18 +365,18 @@ export class UnitedStatesMapComponent implements OnInit {
       .attr("stroke-width", 0.3)
       .attr("cursor", "pointer")
       .attr("fill", function (d) {
-        var cases = d.cases;
-        var cases = cases ? cases : 0;
+        var metric = d.metric;
+        var metric = metric ? metric : 0;
         if (that.type == "Filled") {
           switch (that.scale) {
             case "Linear":
-              return that.colorScaleLinear(cases);
+              return that.colorScaleLinear(metric);
             case "Exponential":
-              return that.colorScaleExp(cases);
+              return that.colorScaleExp(metric);
             case "Logarithmic":
-              return that.colorScaleLog(cases);
+              return that.colorScaleLog(metric);
             case "Sqrrt":
-              return that.colorScaleSqrt(cases);
+              return that.colorScaleSqrt(metric);
           }
         }
         else {
@@ -375,7 +391,7 @@ export class UnitedStatesMapComponent implements OnInit {
 
         that.tooltip
           .html(
-            d.name + "<br/><b>Total Cases:</b> " + that.formatDecimal(d.cases)
+            d.name + "<br/><b>Total " + that.metric + ":</b> " + that.formatDecimal(d.metric)
           )
           .style("left", d3.event.pageX + "px")
           .style("top", d3.event.pageY + "px");
@@ -410,13 +426,13 @@ export class UnitedStatesMapComponent implements OnInit {
         .attr("r", function (d) {
           switch (that.scale) {
             case "Linear":
-              return that.linearScale(d.cases);
+              return that.linearScale(d.metric);
             case "Exponential":
-              return that.expScale(d.cases);
+              return that.expScale(d.metric);
             case "Logarithmic":
-              return that.logScale(d.cases);
+              return that.logScale(d.metric);
             case "Sqrrt":
-              return that.sqrtScale(d.cases);
+              return that.sqrtScale(d.metric);
           }
         })
         .on("click", function (d) {
@@ -427,7 +443,7 @@ export class UnitedStatesMapComponent implements OnInit {
             .duration(200)
             .style('opacity', .9);
 
-          that.tooltip.html(d.name + '<br/><b>Total Cases:</b> ' + that.formatDecimal(d.cases))
+          that.tooltip.html(d.name + '<br/><b>Total " + that.metric + ":</b> ' + that.formatDecimal(d.metric))
             .style('left', (d3.event.pageX) + 'px')
             .style('top', (d3.event.pageY) + 'px')
 
@@ -544,11 +560,11 @@ export class UnitedStatesMapComponent implements OnInit {
       .attr("y", that.legendContainerSettings.y + 14)
       .style("font-size", 14)
       .style("font-weight", "bold")
-      .text("COVID-19 Cases by State (" + that.scale + ")");
+      .text("COVID-19 " + that.metric + " by State (" + that.scale + ")");
 
   }
 
-  getCases(rangeValue) {
+  getMetrics(rangeValue) {
     switch (this.scale) {
       case "Linear":
         return this.formatDecimal(this.linearScale.invert(rangeValue));

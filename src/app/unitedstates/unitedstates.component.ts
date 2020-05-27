@@ -1,12 +1,13 @@
 import { Component, OnInit, OnDestroy, AfterContentInit, ElementRef } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
 
 import { ViewChild } from '@angular/core';
 
-import { ChartControlsService } from '../chart-controls.service';
 import { UnitedStatesMapComponent } from '../unitedstates-map/unitedstates-map.component';
+import { Subscription } from 'rxjs';
+import { filter } from 'rxjs/operators';
 
- 
+
 @Component({
   selector: 'app-unitedstates',
   templateUrl: './unitedstates.component.html',
@@ -16,54 +17,37 @@ export class UnitedStatesComponent implements OnInit, OnDestroy, AfterContentIni
 
   @ViewChild('UnitedStatesMapComponent', { static: true }) map: UnitedStatesMapComponent;
 
- 
-  chartData: number[] = [];
+  private _routerSub = Subscription.EMPTY;
+  public metric = "Cases";
 
-  displayedColumns = ['legend', 'orderStatus', 'total'];
+  constructor(private router: Router, public route: ActivatedRoute) {
 
-  refreshInterval;
-
-  constructor(private router: Router, public chartControlsService: ChartControlsService) { 
-    this.chartControlsService.fullScreen = false;
+    this._routerSub = router.events.pipe(
+      filter(event => event instanceof NavigationEnd)
+    ).subscribe((event: NavigationEnd) => {
+      this.route.params.subscribe(params => {
+        if (this.route.snapshot.params['selectedMetric']) {
+          this.metric = this.route.snapshot.params['selectedMetric'];
+        }
+      });
+    });
 
   }
 
   ngOnInit() {
   }
 
-  initialize() {
-    if (this.refreshInterval) {
-      clearInterval(this.refreshInterval);
-    }
-    this.refreshInterval = setInterval(() => {
-      if (document.hasFocus()) {
-      }
-    }, 1000);
-
-  }
-
   ngOnDestroy() {
-    if (this.refreshInterval) {
-      clearInterval(this.refreshInterval);
-    }
   }
 
   ngAfterContentInit() {
-    this.initialize();
   }
 
-
-
-
-
   navigateLeft() {
-    this.router.navigate(['/delivery']);
   }
 
   navigateRight() {
-    this.router.navigate(['/status']);
   }
-
 
 }
 

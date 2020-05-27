@@ -9,9 +9,12 @@ import { CountiesComponent } from './counties/counties.component';
 
 import { UnitedStatesMapComponent} from './unitedstates-map/unitedstates-map.component'
 import { CountiesMapComponent } from './counties-map/counties-map.component';
- 
+import { NavMenuComponent } from './components/navmenu/navmenu.component';
+
 import { DrillDownService } from './shared/drilldown.services';
 import { ButtonsModule } from '@progress/kendo-angular-buttons';
+import { LayoutModule } from '@progress/kendo-angular-layout';
+import { RippleModule } from '@progress/kendo-angular-ripple';
 
 
 @NgModule({
@@ -20,13 +23,16 @@ import { ButtonsModule } from '@progress/kendo-angular-buttons';
     UnitedStatesComponent,
     UnitedStatesMapComponent,
     CountiesComponent,
-    CountiesMapComponent
+    CountiesMapComponent,
+    NavMenuComponent
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
     BrowserAnimationsModule,
-    ButtonsModule   
+    ButtonsModule,
+    LayoutModule,
+    RippleModule
   ],
   providers: [DrillDownService],
   bootstrap: [AppComponent]

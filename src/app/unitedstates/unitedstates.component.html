@@ -1,14 +1,14 @@
-<div class="container">
-  <div class="title">
-    <div class="left"></div>
-    <div>Cases in the United States</div>
-    <div class="right"></div>
-  </div>
-  <div id="ordersByStatus" #ordersByStatus>
-    <div id="chartAndDataContainer">
-      <div id="chartContainer" [ngClass]="{'half': chartControlsService.showData}">
-        <app-unitedstates-map #ordersByStatusChart [data]="chartData"></app-unitedstates-map>
-      </div>
+<div class="card-container">
+  <div class="row">
+    <div class="col-md-12">
+      <kendo-card class="kendo-card" style="min-width:1200px">
+        <kendo-card-body>
+          <i class="material-icons">place</i>
+          <div class="card-title"><h4>{{metric}} in the United States</h4></div>
+          <app-unitedstates-map #map></app-unitedstates-map>
+        </kendo-card-body>
+      </kendo-card>
     </div>
   </div>
 </div>
+

@@ -3,16 +3,9 @@ import { Router, NavigationEnd, ActivatedRoute } from '@angular/router';
 
 import { ViewChild } from '@angular/core';
 
-import { ChartControlsService } from '../chart-controls.service';
 import { Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { CountiesMapComponent } from '../counties-map/counties-map.component';
-
-export class OrderState {
-  state: string;
-  stateDisplayValue: string;
-  count: number;
-}
 
 
 @Component({
@@ -23,17 +16,13 @@ export class OrderState {
 export class CountiesComponent implements OnInit, OnDestroy, AfterContentInit {
 
   @ViewChild('countiesMap', { static: true }) countiesMap: CountiesMapComponent;
-
- 
- 
  
   refreshInterval;
   selectedState = "United States"; 
 
   private _routerSub = Subscription.EMPTY;
 
-  constructor(public router: Router, public route: ActivatedRoute, public chartControlsService: ChartControlsService) { 
-    this.chartControlsService.fullScreen = false;
+  constructor(public router: Router, public route: ActivatedRoute) { 
 
     this._routerSub = router.events.pipe(
       filter(event => event instanceof NavigationEnd)
@@ -69,8 +58,6 @@ export class CountiesComponent implements OnInit, OnDestroy, AfterContentInit {
     this.initialize();
   }
 
-
-
   navigateLeft() {
     this.router.navigate(['/unitedstates' + "/" + this.countiesMap.type + "/" + this.countiesMap.scale]);
   }
@@ -79,9 +66,5 @@ export class CountiesComponent implements OnInit, OnDestroy, AfterContentInit {
     this.router.navigate(['/status']);
   }
 
-
 }
 
-export function randomInt(min, max) {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
