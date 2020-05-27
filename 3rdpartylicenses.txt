@@ -71,6 +71,21 @@ All available Kendo UI commercial licenses may be obtained at http://www.telerik
 @progress/kendo-angular-l10n
 SEE LICENSE IN LICENSE.md
 
+@progress/kendo-angular-layout
+SEE LICENSE in LICENSE.md
+# Kendo UI for Angular
+
+This package is part of the [Kendo UI for Angular](http://www.telerik.com/kendo-angular-ui/) suite.
+
+## License
+
+This is commercial software. To use it, you need to agree to the [**Telerik End User License Agreement for Kendo UI**](http://www.telerik.com/purchase/license-agreement/kendo-ui). If you do not own a commercial license, this file shall be governed by the trial license terms.
+
+All available Kendo UI commercial licenses may be obtained at http://www.telerik.com/purchase/kendo-ui.
+
+*Copyright © 2020 Progress Software Corporation and/or one of its subsidiaries or affiliates. All rights reserved.*
+
+
 @progress/kendo-angular-popup
 SEE LICENSE in LICENSE.md
 # Kendo UI for Angular
@@ -86,6 +101,9 @@ All available Kendo UI commercial licenses may be obtained at http://www.telerik
 *Copyright © 2020 Progress Software Corporation and/or one of its subsidiaries or affiliates. All rights reserved.*
 
 
+@progress/kendo-angular-ripple
+SEE LICENSE IN LICENSE.md
+
 @progress/kendo-popup-common
 Apache-2.0
 This project has been released under the [Apache License, version 2.0](https://www.apache.org/licenses/LICENSE-2.0.html), the text of which is included below. This license applies ONLY to the source of this repository and does not extend to any other Kendo UI distribution or variant, or any other 3rd party libraries used in a repository. For licensing information about Kendo UI, see the [License Agreements page](https://www.telerik.com/purchase/license-agreements) at [telerik.com](https://www.telerik.com).
@@ -96,6 +114,9 @@ This project has been released under the [Apache License, version 2.0](https://w
 > * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 > * See the License for the specific language governing permissions and limitations under the License.
 
+
+@progress/kendo-ripple
+SEE LICENSE IN LICENSE.md
 
 @progress/kendo-theme-material
 Apache-2.0
