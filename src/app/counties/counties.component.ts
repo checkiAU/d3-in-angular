@@ -20,6 +20,7 @@ export class CountiesComponent implements OnInit, OnDestroy, AfterContentInit {
   refreshInterval;
   selectedState = "United States";
   metric = "Cases";
+  icon = "place";
 
   private _routerSub = Subscription.EMPTY;
 
@@ -34,6 +35,14 @@ export class CountiesComponent implements OnInit, OnDestroy, AfterContentInit {
         this.route.params.subscribe(params => {
           if (this.route.snapshot.params['selectedMetric']) {
             this.metric = this.route.snapshot.params['selectedMetric'];
+            switch (this.metric) {
+              case "Cases":
+                this.icon = "place";
+                break;
+              case "Deaths":
+                this.icon = "warning";
+                break;
+            }
           }
         });
 

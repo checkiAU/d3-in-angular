@@ -82,6 +82,7 @@ export class CountiesMapComponent implements OnInit {
   type = "Filled";
   metric = "Cases"
 
+
   linearScale;
   colorScaleLinear;
   expScale;
@@ -137,6 +138,8 @@ export class CountiesMapComponent implements OnInit {
 
         if (this.route.snapshot.params['selectedMetric']) {
           this.metric = this.route.snapshot.params['selectedMetric'];
+
+  
         }
         
         if (this.router.url.indexOf('/counties') != -1) {
@@ -386,7 +389,7 @@ export class CountiesMapComponent implements OnInit {
           .duration(200)
           .style('opacity', .9);
 
-        that.tooltip.html(d.name + '<br/><b>Total ' + this.metric + ':</b> ' + that.formatDecimal(d.metric))
+        that.tooltip.html(d.name + '<br/><b>Total ' + that.metric + ':</b> ' + that.formatDecimal(d.metric))
           .style('left', (d3.event.pageX) + 'px')
           .style('top', (d3.event.pageY) + 'px')
 

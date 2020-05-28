@@ -19,7 +19,7 @@ export class UnitedStatesComponent implements OnInit, OnDestroy, AfterContentIni
 
   private _routerSub = Subscription.EMPTY;
   public metric = "Cases";
-
+  public icon = "place";
   constructor(private router: Router, public route: ActivatedRoute) {
 
     this._routerSub = router.events.pipe(
@@ -28,6 +28,15 @@ export class UnitedStatesComponent implements OnInit, OnDestroy, AfterContentIni
       this.route.params.subscribe(params => {
         if (this.route.snapshot.params['selectedMetric']) {
           this.metric = this.route.snapshot.params['selectedMetric'];
+          switch (this.metric) {
+            case "Cases":
+              this.icon = "place";
+              break;
+            case "Deaths":
+              this.icon = "warning";
+              break;
+          }
+
         }
       });
     });
