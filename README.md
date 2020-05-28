@@ -1,6 +1,6 @@
 # Tracking Covid Data with Reactive Maps and Charts in Angular 9 using D3
 
-This projects shows how to build reactive maps and charts inside an Angular 9 application using the D3 JavaScript framework.
+This projects shows how to build interactive maps and charts inside an Angular 9 application using the D3 JavaScript framework.
 
 Click [here](https://medium.com/@johncbowyer/covid-19-maps-in-angular-9-using-d3-js-b14843795a0c) to view application overview.
 
