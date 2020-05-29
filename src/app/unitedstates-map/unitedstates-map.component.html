@@ -5,7 +5,7 @@
   </div>
 
   <div class="row">
-    <div class="col-md-6">
+    <div class="col-md-3">
       <kendo-buttongroup [selection]="'single'">
         <button *ngFor="let button of typeButtons"
                 kendoButton
@@ -19,7 +19,14 @@
       </kendo-buttongroup>
 
     </div>
- 
+    <div class="col-md-3">
+         <kendo-slider #slider [tickPlacement]="tickPlacement"
+                                   [min]="min"
+                                   [max]="max"
+                                   [smallStep]="smallStep"
+                                   (valueChange)="valueChange($event)"></kendo-slider>:
+      
+    </div>
     <div class="col-md-6" >
 
       <kendo-buttongroup [selection]="'single'"  >

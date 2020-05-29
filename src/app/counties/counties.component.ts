@@ -6,6 +6,7 @@ import { ViewChild } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { CountiesMapComponent } from '../counties-map/counties-map.component';
+import { MetricSummaryComponent } from '../metric-summary/metric-summary.component';
 
 
 @Component({
@@ -16,7 +17,8 @@ import { CountiesMapComponent } from '../counties-map/counties-map.component';
 export class CountiesComponent implements OnInit, OnDestroy, AfterContentInit {
 
   @ViewChild('countiesMap', { static: true }) countiesMap: CountiesMapComponent;
- 
+  @ViewChild('metricSummary', { static: true }) metricSummary: MetricSummaryComponent;
+
   refreshInterval;
   selectedState = "United States";
   metric = "Cases";
@@ -52,6 +54,7 @@ export class CountiesComponent implements OnInit, OnDestroy, AfterContentInit {
   }
 
   ngOnInit() {
+  
   }
 
   initialize() {
@@ -76,12 +79,18 @@ export class CountiesComponent implements OnInit, OnDestroy, AfterContentInit {
   }
 
   navigateLeft() {
-    this.router.navigate(['/unitedstates' + "/" + this.countiesMap.type + "/" + this.countiesMap.scale + "/" + this.countiesMap.metric]);
+    this.router.navigate(['/unitedstates' + "/" + this.countiesMap.type + "/" + this.countiesMap.scale + "/" + this.countiesMap.metric + "/" + this.countiesMap.date]);
   }
 
   navigateRight() {
     this.router.navigate(['/status']);
   }
 
+  dateChanged(date) {
+    if (date) {
+      this.metricSummary.date = date;
+      this.metricSummary.updateSummary();
+    }
+  }
 }
 

@@ -1,13 +1,28 @@
 <div class="card-container">
   <div class="row">
-    <div class="col-md-12">
-      <kendo-card class="kendo-card" style="min-width:1200px">
+    <div class="col-md-8">
+      <kendo-card class="kendo-card" style="min-width:900px">
         <kendo-card-body>
           <i class="material-icons">{{icon}}</i>
-          <div class="card-title"><h4>{{metric}} in the United States</h4></div>
-          <app-unitedstates-map #map></app-unitedstates-map>
+          <div class="card-title"><h4>{{metric}} in the United States - {{unitedStatesMap.date }}</h4></div>
+          <app-unitedstates-map  (dateChanged)="dateChanged($event)" #unitedStatesMap></app-unitedstates-map>
         </kendo-card-body>
       </kendo-card>
+    </div>
+    <div class="col-md-4">
+      <div class="container">
+        <div class="row">
+          <div class="col-md">
+            <kendo-card class="kendo-card" style="min-width:400px">
+              <kendo-card-body>
+                <i class="material-icons">{{icon}}</i>
+                <div class="card-title"><h4>Metrics in United States</h4></div>
+                <app-metric-summary #metricSummary></app-metric-summary>
+              </kendo-card-body>
+            </kendo-card>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>

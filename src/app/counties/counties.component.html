@@ -1,21 +1,33 @@
 <div class="card-container">
   <div class="row">
-    <div class="col-md-12">
-      <kendo-card class="kendo-card" style="min-width:1200px">
+    <div class="col-md-8">
+      <kendo-card class="kendo-card" style="min-width:900px">
         <kendo-card-body>
           <i class="material-icons">{{icon}}</i>
-          <div class="container-fluid card-title">
-            <div class="row">                
-              <div class="col-md-12">
-                <h4>  <button kendoButton [icon]="'arrow-chevron-left'" (click)="navigateLeft()"></button> {{metric}} in {{selectedState}} By County</h4>
-              </div>
-            </div>
-          </div>
-          <app-counties-map #countiesMap></app-counties-map>
+          <div class="card-title"><h4><button kendoButton [icon]="'arrow-chevron-left'" (click)="navigateLeft()"></button>&nbsp;{{metric}} in {{countiesMap.selectedState }} - {{countiesMap.date }}</h4></div>
+          <app-counties-map (dateChanged)="dateChanged($event)" #countiesMap></app-counties-map>
         </kendo-card-body>
       </kendo-card>
     </div>
+    <div class="col-md-4">
+      <div class="container">
+        <div class="row">
+          <div class="col-md">
+            <kendo-card class="kendo-card" style="min-width:400px">
+              <kendo-card-body>
+                <i class="material-icons">{{icon}}</i>
+                <div class="card-title"><h4>Metrics in {{countiesMap.selectedState }}</h4></div>
+                <app-metric-summary #metricSummary></app-metric-summary>
+              </kendo-card-body>
+            </kendo-card>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
+
+
+ 
 
 

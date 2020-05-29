@@ -24,8 +24,8 @@ export class AppComponent implements OnInit {
   @ViewChild('navmenu') navmenu;
 
   public items: Array<any> = [
-    { text: 'Cases Map', icon: 'place', path: '/unitedstates/Filled/Sqrrt/Cases' },
-    { text: 'Deaths Map', icon: 'warning', path: '/unitedstates/Filled/Sqrrt/Deaths' },
+    { text: 'Cases Map', icon: 'place', path: '/unitedstates/Filled/Sqrrt/Cases/2020-05-27' },
+    { text: 'Deaths Map', icon: 'warning', path: '/unitedstates/Filled/Sqrrt/Deaths/2020-05-27' },
   ];
 
   public onSelect(ev: DrawerSelectEvent): void {

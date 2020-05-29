@@ -15,6 +15,15 @@ import { DrillDownService } from './shared/drilldown.services';
 import { ButtonsModule } from '@progress/kendo-angular-buttons';
 import { LayoutModule } from '@progress/kendo-angular-layout';
 import { RippleModule } from '@progress/kendo-angular-ripple';
+import { InputsModule } from '@progress/kendo-angular-inputs';
+import { LabelModule } from '@progress/kendo-angular-label';
+import { MetricSummaryComponent } from './metric-summary/metric-summary.component';
+import { ChartsModule } from '@progress/kendo-angular-charts';
+import 'hammerjs';
+
+
+
+
 
 
 @NgModule({
@@ -24,7 +33,8 @@ import { RippleModule } from '@progress/kendo-angular-ripple';
     UnitedStatesMapComponent,
     CountiesComponent,
     CountiesMapComponent,
-    NavMenuComponent
+    NavMenuComponent,
+    MetricSummaryComponent
   ],
   imports: [
     BrowserModule,
@@ -32,7 +42,10 @@ import { RippleModule } from '@progress/kendo-angular-ripple';
     BrowserAnimationsModule,
     ButtonsModule,
     LayoutModule,
-    RippleModule
+    RippleModule,
+    InputsModule,
+    LabelModule,
+    ChartsModule
   ],
   providers: [DrillDownService],
   bootstrap: [AppComponent]

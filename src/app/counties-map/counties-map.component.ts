@@ -1,7 +1,7 @@
-import { Component, OnInit, ElementRef, ViewEncapsulation, Input, SimpleChanges, OnChanges, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ElementRef, ViewEncapsulation, Input, SimpleChanges, OnChanges, ChangeDetectorRef, ViewChild, EventEmitter, Output } from '@angular/core';
 
-import countiesdata from "./counties.json";
-import * as coviddata from "./counties-covid.json";
+import countiesdata from "../data/counties.json";
+import * as coviddata from "../data/counties-historical.json";
 import * as d3 from 'd3';
 import * as topojson from 'topojson';
 import { Subscription } from 'rxjs';
@@ -10,6 +10,10 @@ import { tap, catchError, finalize, filter, delay } from 'rxjs/operators';
 import { DrillDownService } from '../shared/drilldown.services';
 
 import { Location } from '@angular/common';
+import {
+	formatDate
+} from '@angular/common';
+import { SliderComponent } from '@progress/kendo-angular-inputs';
 
 @Component({
   selector: 'app-counties-map',
@@ -20,7 +24,9 @@ import { Location } from '@angular/common';
 })
 export class CountiesMapComponent implements OnInit {
 
-  @Input() data: number[];
+  @ViewChild('slider', { static: true }) slider: SliderComponent;
+  @Output() dateChanged = new EventEmitter<any>();
+
   hostElement; // Native element hosting the SVG container
   svg; // Top level SVG element
   g; // SVG Group element
@@ -41,7 +47,7 @@ export class CountiesMapComponent implements OnInit {
   legendContainerSettings = {
     x: 0,
     y: this.height,
-    width: 370,
+    width: 420,
     height: 75,
     roundX: 10,
     roundY: 10
@@ -65,7 +71,7 @@ export class CountiesMapComponent implements OnInit {
   formatDecimal = d3.format(',.0f');
   legendContainer;
 
-  legendData = [ 0.2, 0.4, 0.6, 0.8, 1];
+  legendData = [0, 0.2, 0.4, 0.6, 0.8, 1];
 
   merged: any[] = [];
   covid: any[] = [];
@@ -80,7 +86,10 @@ export class CountiesMapComponent implements OnInit {
   end;
   scale = "Sqrrt";
   type = "Filled";
-  metric = "Cases"
+  metric = "Cases";
+  date = "2020-05-27";
+	dateMin = "2020-01-21";
+	dateMax = "2020-05-27"
 
 
   linearScale;
@@ -108,6 +117,13 @@ export class CountiesMapComponent implements OnInit {
   tooltip = d3.select('body').append('div')
     .attr('class', 'tooltip')
     .style('opacity', 0);
+
+	/* slider */
+	public tickPlacement: string = 'none';
+	public value: number;
+	public min: number;
+	public max: number;
+	public smallStep: number = 86400000;
 
 
   constructor(private elRef: ElementRef, public router: Router, public route: ActivatedRoute, private changeDetectorRef: ChangeDetectorRef, private drillDownService: DrillDownService, private location: Location) {
@@ -137,14 +153,20 @@ export class CountiesMapComponent implements OnInit {
         }
 
         if (this.route.snapshot.params['selectedMetric']) {
-          this.metric = this.route.snapshot.params['selectedMetric'];
+          this.metric = this.route.snapshot.params['selectedMetric'];  
+        }
 
-  
+        if (this.route.snapshot.params['selectedDate']) {
+          this.date = this.route.snapshot.params['selectedDate'];
+          this.slider.value = new Date(this.date).getTime();
+        }
+        else {
+          this.date = this.route.snapshot.params['selectedDate'];
         }
         
         if (this.router.url.indexOf('/counties') != -1) {
           this.removeExistingMapFromParent();
-          this.updateMap();
+          this.updateMap(true);
         }
 
 
@@ -154,6 +176,11 @@ export class CountiesMapComponent implements OnInit {
   }
 
   ngOnInit() {
+
+		this.min = new Date(this.dateMin).getTime();
+		this.max = new Date(this.dateMax).getTime();
+    // default to end date
+    this.value = this.max ;
 
   }
 
@@ -167,7 +194,7 @@ export class CountiesMapComponent implements OnInit {
 
 
 
-  updateMap() {
+  updateMap(performZoom) {
 
 
     this.active = d3.select(null);
@@ -212,7 +239,27 @@ export class CountiesMapComponent implements OnInit {
     this.g = this.svg.append('g');
 
     that.covid = coviddata.counties;
-    //  });
+
+	 var covidMax = that.covid.filter(function (d) {
+			return d.date === that.dateMax  && d.state === that.selectedState
+		});
+
+		that.start = 1;
+
+    // Get data for max date
+		that.end = d3.max(covidMax, function (d: any) {
+			switch (that.metric) {
+				case "Cases":
+					return d.cases;
+				case "Deaths":
+					return d.deaths;
+			}
+		});
+
+    // Get current date
+		that.covid = that.covid.filter(function (d) {
+			return d.date === that.date  && d.state === that.selectedState
+		});
 
     that.counties = topojson.feature(countiesdata, countiesdata.objects.collection).features;
 
@@ -220,11 +267,18 @@ export class CountiesMapComponent implements OnInit {
     if (that.selectedState != 'All') {
       that.counties = that.counties.filter(function (d) { return d.properties.state === that.selectedState });
 
-      if (that.drillDownService.x) {
+      if (that.drillDownService.x  && performZoom) {
         that.svg.transition()
           .duration(750)
           .call(that.zoom.transform, d3.zoomIdentity.translate(that.drillDownService.x, that.drillDownService.y).scale(that.drillDownService.scale))
       }
+      else
+      {
+       that.svg.transition()
+          .duration(0)
+          .call(that.zoom.transform, d3.zoomIdentity.translate(that.drillDownService.x, that.drillDownService.y).scale(that.drillDownService.scale))
+      }
+
     }
 
     that.merged = that.join(that.covid, that.counties, "fips", "fips", function (county, covid) {
@@ -248,15 +302,9 @@ export class CountiesMapComponent implements OnInit {
       };
     });
 
+    // Sort for bubble overlays
     that.merged = that.merged.sort((a, b) => a.metric > b.metric ? - 1 : (a.metric < b.metric ? 1  : 0));
 
-    that.start = d3.min(that.merged, function (d: any) {
-      return d.metric;
-    });
-
-    that.end = d3.max(that.merged, function (d: any) {
-      return d.metric;
-    });
 
     // Linear Scale
     switch (that.type) {
@@ -333,6 +381,7 @@ export class CountiesMapComponent implements OnInit {
     switch (that.type) {
       case "Filled":
         that.legendLabels = [
+          "<" + that.getMetrics(0),
           ">" + that.getMetrics(0),
           ">" + that.getMetrics(0.2),
           ">" + that.getMetrics(0.4),
@@ -342,6 +391,7 @@ export class CountiesMapComponent implements OnInit {
         break;
       case "Bubble":
         that.legendLabels = [
+          "<" + that.getMetrics(0 * 30),
           ">" + that.getMetrics(0 * 30),
           ">" + that.getMetrics(0.2 * 30),
           ">" + that.getMetrics(0.4 * 30),
@@ -365,7 +415,7 @@ export class CountiesMapComponent implements OnInit {
       .attr('fill', function (d) {
         var metric = d.metric;
         var metric = metric ? metric : 0;
-        if (that.type == "Filled") {
+        if (that.type == "Filled"  && metric > 0) {
           switch (that.scale) {
             case "Linear":
               return that.colorScaleLinear(metric);
@@ -599,16 +649,25 @@ export class CountiesMapComponent implements OnInit {
 
   selectedScaleChange(e, btn) {
     this.scale = btn.text;
-    this.location.go('counties/' + this.selectedState + '/' + this.type + '/' + this.scale + '/' + this.metric);
+    this.location.go('counties/' + this.selectedState + '/' + this.type + '/' + this.scale + '/' + this.metric + '/' + this.date);
     this.removeExistingMapFromParent();
-    this.updateMap();
+    this.updateMap(true);
   }
 
   selectedTypeChange(e, btn) {
     this.type = btn.text;
-    this.location.go('counties/' + this.selectedState + '/' + this.type + '/' + this.scale + '/' + this.metric);
+    this.location.go('counties/' + this.selectedState + '/' + this.type + '/' + this.scale + '/' + this.metric + '/' + this.date);
     this.removeExistingMapFromParent();
-    this.updateMap();
+    this.updateMap(true);
   }
+
+	valueChange(e) {
+		this.value = e;
+    this.date = formatDate(new Date(this.value), 'yyyy-MM-dd', 'en');
+    this.location.go('counties/' + this.selectedState + '/' + this.type + '/' + this.scale + '/' + this.metric + '/' + this.date);
+    this.dateChanged.emit(this.date);
+    this.removeExistingMapFromParent();
+		this.updateMap(false);
+	}
 
 }

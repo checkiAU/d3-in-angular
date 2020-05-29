@@ -6,6 +6,7 @@ import { ViewChild } from '@angular/core';
 import { UnitedStatesMapComponent } from '../unitedstates-map/unitedstates-map.component';
 import { Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
+import { MetricSummaryComponent } from '../metric-summary/metric-summary.component';
 
 
 @Component({
@@ -15,7 +16,8 @@ import { filter } from 'rxjs/operators';
 })
 export class UnitedStatesComponent implements OnInit, OnDestroy, AfterContentInit {
 
-  @ViewChild('UnitedStatesMapComponent', { static: true }) map: UnitedStatesMapComponent;
+  @ViewChild('unitedStatesMap', { static: true }) unitedStatesMap: UnitedStatesMapComponent;
+  @ViewChild('metricSummary', { static: true }) metricSummary: MetricSummaryComponent;
 
   private _routerSub = Subscription.EMPTY;
   public metric = "Cases";
@@ -36,7 +38,6 @@ export class UnitedStatesComponent implements OnInit, OnDestroy, AfterContentIni
               this.icon = "warning";
               break;
           }
-
         }
       });
     });
@@ -58,8 +59,12 @@ export class UnitedStatesComponent implements OnInit, OnDestroy, AfterContentIni
   navigateRight() {
   }
 
+  dateChanged(date) {
+    if (date) {
+      this.metricSummary.date = date;
+      this.metricSummary.updateSummary();
+    }
+  }
 }
 
-export function randomInt(min, max) {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
+ 

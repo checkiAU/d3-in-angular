@@ -7,6 +7,7 @@ export class DrillDownService  {
   public x = 0;
   public y = 0;
   public scale = 0;
+  public date;
 
   constructor() {
 

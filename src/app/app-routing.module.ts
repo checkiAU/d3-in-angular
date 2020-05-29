@@ -5,8 +5,8 @@ import { CountiesComponent } from './counties/counties.component';
 
 
 const routes: Routes = [
-  { path: 'counties/:selectedState/:selectedType/:selectedScale/:selectedMetric', component: CountiesComponent },
-  { path: 'unitedstates/:selectedType/:selectedScale/:selectedMetric', component: UnitedStatesComponent },
+  { path: 'counties/:selectedState/:selectedType/:selectedScale/:selectedMetric/:selectedDate', component: CountiesComponent },
+  { path: 'unitedstates/:selectedType/:selectedScale/:selectedMetric/:selectedDate', component: UnitedStatesComponent },
   { path: '', component: UnitedStatesComponent }
 ];
 
