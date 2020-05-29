@@ -42,6 +42,7 @@ import {
 	DrillDownService
 } from "../shared/drilldown.services";
 import { SliderComponent } from '@progress/kendo-angular-inputs';
+import { DropDownListComponent } from '@progress/kendo-angular-dropdowns';
 
 
 @Component({
@@ -52,7 +53,7 @@ import { SliderComponent } from '@progress/kendo-angular-inputs';
 })
 export class UnitedStatesMapComponent implements OnInit {
 
-  @ViewChild('slider', { static: true }) slider: SliderComponent;
+   @ViewChild('slider', { static: true }) slider: SliderComponent;
   @Output() dateChanged = new EventEmitter<any>();
 
 	hostElement; // Native element hosting the SVG container
@@ -69,20 +70,8 @@ export class UnitedStatesMapComponent implements OnInit {
 	width = 960;
 	height = 500;
 
-	public scaleButtons = [{
-			text: "Sqrrt",
-			selected: true
-		},
-		{
-			text: "Linear"
-		},
-		{
-			text: "Exponential"
-		},
-		{
-			text: "Logarithmic"
-		}
-	];
+ 
+	public scaleButtons = [  "Sqrrt", "Linear", "Exponential",  "Logarithmic"];
 
 	public typeButtons = [{
 			text: "Filled",
@@ -196,15 +185,8 @@ export class UnitedStatesMapComponent implements OnInit {
 					}
 
 					if (this.route.snapshot.params['selectedScale']) {
-						var button = this.scaleButtons.find(({
-							text
-						}) => text === this.scale);
-						button.selected = false;
+ 
 						this.scale = this.route.snapshot.params['selectedScale'];
-						var button = this.scaleButtons.find(({
-							text
-						}) => text === this.scale);
-						button.selected = true;
 					}
 
 					if (this.route.snapshot.params['selectedMetric']) {
@@ -232,8 +214,9 @@ export class UnitedStatesMapComponent implements OnInit {
 		this.min = new Date(this.dateMin).getTime();
 		this.max = new Date(this.dateMax).getTime();
     // default to end date
-    this.value = this.max ;
+    this.value = this.max;
 
+ 
 	}
 
 	private removeExistingMapFromParent() {
@@ -749,8 +732,8 @@ export class UnitedStatesMapComponent implements OnInit {
 		return output;
 	}
 
-	selectedScaleChange(e, btn) {
-		this.scale = btn.text;
+  selectedScaleChange(value: any) {
+    this.scale = value;
 		this.location.go('unitedstates/' + this.type + '/' + this.scale + '/' + this.metric + "/" + this.date);
     this.drillDownService.date = this.date;
     this.removeExistingMapFromParent();

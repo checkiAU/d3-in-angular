@@ -28,18 +28,14 @@
 
     </div>
     <div class="col-md-6">
+      <kendo-label text="Scale:" class="float-right">
+        &nbsp;
+        <kendo-dropdownlist #scaleDropDown [data]="scaleButtons" valuePrimitive="true"
+                            (selectionChange)="selectedScaleChange($event)"
+                            [(ngModel)]="scale">
+        </kendo-dropdownlist>
+      </kendo-label>
 
-      <kendo-buttongroup [selection]="'single'">
-        <button *ngFor="let button of scaleButtons"
-                kendoButton
-                [toggleable]="true"
-                [selected]="button.selected"
-                (selectedChange)="selectedScaleChange($event, button)">
-          <span>
-            {{ button.text }}
-          </span>
-        </button>
-      </kendo-buttongroup>
     </div>
   </div>
   <div class="row">

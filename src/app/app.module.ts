@@ -21,6 +21,12 @@ import { MetricSummaryComponent } from './metric-summary/metric-summary.componen
 import { ChartsModule } from '@progress/kendo-angular-charts';
 import 'hammerjs';
 import { AboutComponent } from './about/about.component';
+import { DropDownsModule } from '@progress/kendo-angular-dropdowns';
+import { FormsModule } from '@angular/forms';
+import { GridModule } from '@progress/kendo-angular-grid';
+import { MetricTableComponent } from './metric-table/metric-table.component';
+
+
 
 
 
@@ -36,7 +42,8 @@ import { AboutComponent } from './about/about.component';
     CountiesMapComponent,
     NavMenuComponent,
     MetricSummaryComponent,
-    AboutComponent
+    AboutComponent,
+    MetricTableComponent
   ],
   imports: [
     BrowserModule,
@@ -47,7 +54,10 @@ import { AboutComponent } from './about/about.component';
     RippleModule,
     InputsModule,
     LabelModule,
-    ChartsModule
+    ChartsModule,
+    DropDownsModule,
+    FormsModule,
+    GridModule 
   ],
   providers: [DrillDownService],
   bootstrap: [AppComponent]

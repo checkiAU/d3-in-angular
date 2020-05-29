@@ -17,6 +17,9 @@
                                        categoryField="dateTime"
                                        aggregate="sum">
                 <kendo-chart-series-item-tooltip>
+                  <ng-template let-value="value" let-category="category">
+                    <span>{{category | date: 'shortDate'}}: {{value |  number:'1.0':'en-US' }}</span>
+                  </ng-template>
                 </kendo-chart-series-item-tooltip>
               </kendo-chart-series-item>
             </kendo-chart-series>
@@ -52,6 +55,9 @@
                                        categoryField="dateTime"
                                        aggregate="sum">
                 <kendo-chart-series-item-tooltip>
+                  <ng-template let-value="value" let-category="category">
+                    <span>{{category | date: 'shortDate'}}: {{value |  number:'1.0':'en-US' }}</span>
+                  </ng-template>
                 </kendo-chart-series-item-tooltip>
               </kendo-chart-series-item>
             </kendo-chart-series>

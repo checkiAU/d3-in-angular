@@ -5,7 +5,7 @@
         <kendo-card-body>
           <i class="material-icons">{{icon}}</i>
           <div class="card-title"><h4>{{metric}} in the United States - {{unitedStatesMap.date }}</h4></div>
-          <app-unitedstates-map  (dateChanged)="dateChanged($event)" #unitedStatesMap></app-unitedstates-map>
+          <app-unitedstates-map (dateChanged)="dateChanged($event)" #unitedStatesMap></app-unitedstates-map>
         </kendo-card-body>
       </kendo-card>
     </div>
@@ -18,6 +18,22 @@
                 <i class="material-icons">{{icon}}</i>
                 <div class="card-title"><h4>Metrics in United States</h4></div>
                 <app-metric-summary #metricSummary></app-metric-summary>
+              </kendo-card-body>
+            </kendo-card>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md" style="height:50px">
+            &nbsp;
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md">
+            <kendo-card class="kendo-card" style="min-width:400px">
+              <kendo-card-body>
+                <i class="material-icons">{{icon}}</i>
+                <div class="card-title"><h4>Breakdown by State</h4></div>
+                <app-metric-table #metricTable></app-metric-table>
               </kendo-card-body>
             </kendo-card>
           </div>

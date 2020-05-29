@@ -101,12 +101,8 @@ export class CountiesMapComponent implements OnInit {
   sqrtScale;
   colorScaleSqrt;
 
-  public scaleButtons = [
-    { text: "Sqrrt", selected: true },
-    { text: "Linear" },
-    { text: "Exponential" },
-    { text: "Logarithmic" }
-  ];
+  public scaleButtons = ["Sqrrt", "Linear", "Exponential", "Logarithmic"];
+
 
   public typeButtons = [
     { text: "Filled", selected: true },
@@ -145,12 +141,8 @@ export class CountiesMapComponent implements OnInit {
         }
 
         if (this.route.snapshot.params['selectedScale']) {
-          var button = this.scaleButtons.find(({ text }) => text === this.scale);
-          button.selected = false;
-          this.scale = this.route.snapshot.params['selectedScale'];
-          var button = this.scaleButtons.find(({ text }) => text === this.scale);
-          button.selected = true;
-        }
+           this.scale = this.route.snapshot.params['selectedScale'];
+         }
 
         if (this.route.snapshot.params['selectedMetric']) {
           this.metric = this.route.snapshot.params['selectedMetric'];  
@@ -647,14 +639,14 @@ export class CountiesMapComponent implements OnInit {
     return output;
   }
 
-  selectedScaleChange(e, btn) {
-    this.scale = btn.text;
+  selectedScaleChange(value) {
+    this.scale = value;
     this.location.go('counties/' + this.selectedState + '/' + this.type + '/' + this.scale + '/' + this.metric + '/' + this.date);
     this.removeExistingMapFromParent();
     this.updateMap(true);
   }
 
-  selectedTypeChange(e, btn) {
+  selectedTypeChange(e, btn  ) {
     this.type = btn.text;
     this.location.go('counties/' + this.selectedState + '/' + this.type + '/' + this.scale + '/' + this.metric + '/' + this.date);
     this.removeExistingMapFromParent();

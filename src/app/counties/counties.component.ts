@@ -7,6 +7,7 @@ import { Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { CountiesMapComponent } from '../counties-map/counties-map.component';
 import { MetricSummaryComponent } from '../metric-summary/metric-summary.component';
+import { MetricTableComponent } from '../metric-table/metric-table.component';
 
 
 @Component({
@@ -18,6 +19,7 @@ export class CountiesComponent implements OnInit, OnDestroy, AfterContentInit {
 
   @ViewChild('countiesMap', { static: true }) countiesMap: CountiesMapComponent;
   @ViewChild('metricSummary', { static: true }) metricSummary: MetricSummaryComponent;
+  @ViewChild('metricTable', { static: true }) metricTable: MetricTableComponent;
 
   refreshInterval;
   selectedState = "United States";
@@ -90,6 +92,8 @@ export class CountiesComponent implements OnInit, OnDestroy, AfterContentInit {
     if (date) {
       this.metricSummary.date = date;
       this.metricSummary.updateSummary();
+      this.metricTable.date = date;
+      this.metricTable.updateSummary();
     }
   }
 }

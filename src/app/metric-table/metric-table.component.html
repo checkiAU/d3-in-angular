@@ -1,0 +1,25 @@
+<span class="comp-label">
+  <small>Data as of {{date}} </small>
+</span>
+
+<kendo-grid [data]="covid" [sortable]="{
+            allowUnsort: true,
+            mode:   'single'
+            }"
+            [sort]=true
+            (sortChange)="sortChange($event)">
+  <kendo-grid-column *ngIf="selectedState=='United States'" field="location" title="State" width="150">
+  </kendo-grid-column>
+  <kendo-grid-column *ngIf="selectedState != 'United States'" field="location" title="County" width="150">
+  </kendo-grid-column>
+  <kendo-grid-column field="cases" title="Cases">
+    <ng-template kendoGridCellTemplate let-dataItem let-rowIndex="rowIndex">
+      <span>{{dataItem.cases | number:'1.0':'en-US'}}</span>
+    </ng-template>
+  </kendo-grid-column>
+  <kendo-grid-column field="deaths" title="Deaths">
+    <ng-template kendoGridCellTemplate let-dataItem let-rowIndex="rowIndex">
+      <span style="color:red">{{dataItem.deaths | number:'1.0':'en-US'}}</span>
+    </ng-template>
+  </kendo-grid-column>
+</kendo-grid>

@@ -7,6 +7,7 @@ import { UnitedStatesMapComponent } from '../unitedstates-map/unitedstates-map.c
 import { Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { MetricSummaryComponent } from '../metric-summary/metric-summary.component';
+import { MetricTableComponent } from '../metric-table/metric-table.component';
 
 
 @Component({
@@ -18,6 +19,7 @@ export class UnitedStatesComponent implements OnInit, OnDestroy, AfterContentIni
 
   @ViewChild('unitedStatesMap', { static: true }) unitedStatesMap: UnitedStatesMapComponent;
   @ViewChild('metricSummary', { static: true }) metricSummary: MetricSummaryComponent;
+  @ViewChild('metricTable', { static: true }) metricTable: MetricTableComponent;
 
   private _routerSub = Subscription.EMPTY;
   public metric = "Cases";
@@ -63,6 +65,8 @@ export class UnitedStatesComponent implements OnInit, OnDestroy, AfterContentIni
     if (date) {
       this.metricSummary.date = date;
       this.metricSummary.updateSummary();
+      this.metricTable.date = date;
+      this.metricTable.updateSummary();
     }
   }
 }
