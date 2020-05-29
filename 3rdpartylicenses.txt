@@ -59,6 +59,9 @@ All available Kendo UI commercial licenses may be obtained at http://www.telerik
 *Copyright © 2020 Progress Software Corporation and/or one of its subsidiaries or affiliates. All rights reserved.*
 
 
+@progress/kendo-angular-charts
+SEE LICENSE IN LICENSE.md
+
 @progress/kendo-angular-common
 SEE LICENSE in LICENSE.md
 # Kendo UI for Angular
@@ -130,6 +133,9 @@ All available Kendo UI commercial licenses may be obtained at http://www.telerik
 
 @progress/kendo-angular-ripple
 SEE LICENSE IN LICENSE.md
+
+@progress/kendo-charts
+SEE LICENSE IN license.txt
 
 @progress/kendo-common
 SEE LICENSE IN LICENSE.md
