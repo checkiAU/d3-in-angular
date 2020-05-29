@@ -26,6 +26,8 @@ export class AppComponent implements OnInit {
   public items: Array<any> = [
     { text: 'Cases', icon: 'place', path: '/unitedstates/Filled/Sqrrt/Cases/2020-05-27' },
     { text: 'Deaths', icon: 'warning', path: '/unitedstates/Filled/Sqrrt/Deaths/2020-05-27' },
+    { text: 'About', icon: 'contact_mail', path: '/about' },
+
   ];
 
   public onSelect(ev: DrawerSelectEvent): void {

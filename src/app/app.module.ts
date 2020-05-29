@@ -20,6 +20,7 @@ import { LabelModule } from '@progress/kendo-angular-label';
 import { MetricSummaryComponent } from './metric-summary/metric-summary.component';
 import { ChartsModule } from '@progress/kendo-angular-charts';
 import 'hammerjs';
+import { AboutComponent } from './about/about.component';
 
 
 
@@ -34,7 +35,8 @@ import 'hammerjs';
     CountiesComponent,
     CountiesMapComponent,
     NavMenuComponent,
-    MetricSummaryComponent
+    MetricSummaryComponent,
+    AboutComponent
   ],
   imports: [
     BrowserModule,
