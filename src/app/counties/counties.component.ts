@@ -81,7 +81,7 @@ export class CountiesComponent implements OnInit, OnDestroy, AfterContentInit {
   }
 
   navigateLeft() {
-    this.router.navigate(['/unitedstates' + "/" + this.countiesMap.type + "/" + this.countiesMap.scale + "/" + this.countiesMap.metric + "/" + this.countiesMap.date]);
+    this.router.navigate(['/unitedstates' + "/" + this.countiesMap.type + "/" + this.countiesMap.scale + "/" + this.countiesMap.metric + "/" + this.countiesMap.date + "/" + this.countiesMap.tab]);
   }
 
   navigateRight() {

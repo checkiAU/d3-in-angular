@@ -1,81 +1,172 @@
-<div class="dashboard">
-  <div class="card">
-    <div class="card-body">
-      <div class="row">
-        <div class="col-12 col-lg-6 col-xl pb-4 active-issues">
-          <span class="comp-label">
-            <strong>{{cases | number:'1.0':'en-US' }} </strong>
-            <small>Cases as of {{date}} </small>
-          </span>
-          <kendo-chart [transitions]="false"style="height: 80px;">
-            <kendo-chart-series-defaults type="area"
-                                         [overlay]="false"></kendo-chart-series-defaults>
-            <kendo-chart-series>
-              <kendo-chart-series-item [color]="'#888'"
-                                       [data]="covid"
-                                       field="cases"
-                                       categoryField="dateTime"
-                                       aggregate="sum">
-                <kendo-chart-series-item-tooltip>
-                  <ng-template let-value="value" let-category="category">
-                    <span>{{category | date: 'shortDate'}}: {{value |  number:'1.0':'en-US' }}</span>
-                  </ng-template>
-                </kendo-chart-series-item-tooltip>
-              </kendo-chart-series-item>
-            </kendo-chart-series>
-            <kendo-chart-category-axis>
-              <kendo-chart-category-axis-item [baseUnit]="baseUnit"
-                                              [majorTicks]="{visible: false}"
-                                              [labels]="{step: 30, skip: 2, font: '10px sans-serif'}"
-                                              [majorGridLines]="{visible: false}"
-                                              [line]="{visible: false}">
+<kendo-tabstrip #tab  >
+  <kendo-tabstrip-tab [title]="'Totals'" [selected]="true">
+    <ng-template kendoTabContent>
+      <div class="dashboard">
+        <div class="card">
+          <div class="card-body">
+            <div class="row">
+              <div class="col-12 col-lg-6 col-xl pb-4 active-issues">
+                <span class="comp-label">
+                  <strong>{{cases | number:'1.0':'en-US' }} </strong>
+                  <small>Total Cases as of {{date}} </small>
+                </span>
+                <kendo-chart [transitions]="false" style="height: 160px;">
+                  <kendo-chart-series-defaults type="area"
+                                               [overlay]="false"></kendo-chart-series-defaults>
+                  <kendo-chart-series>
+                    <kendo-chart-series-item [color]="'#888'"
+                                             [data]="covid"
+                                             field="cases"
+                                             categoryField="dateTime"
+                                             aggregate="sum">
+                      <kendo-chart-series-item-tooltip>
+                        <ng-template let-value="value" let-category="category">
+                          <span>{{category | date: 'shortDate'}}: {{value |  number:'1.0':'en-US' }}</span>
+                        </ng-template>
+                      </kendo-chart-series-item-tooltip>
+                    </kendo-chart-series-item>
+                  </kendo-chart-series>
+                  <kendo-chart-category-axis>
+                    <kendo-chart-category-axis-item [baseUnit]="baseUnit"
+                                                    [majorTicks]="{visible: false}"
+                                                    [labels]="{step: 30, skip: 2, font: '10px sans-serif'}"
+                                                    [majorGridLines]="{visible: false}"
+                                                    [line]="{visible: false}">
 
-              </kendo-chart-category-axis-item>
-            </kendo-chart-category-axis>
-            <kendo-chart-value-axis>
-              <kendo-chart-value-axis-item [visible]="false" [majorGridLines]="{visible: false}">
-              </kendo-chart-value-axis-item>
-            </kendo-chart-value-axis>
-          </kendo-chart>
+                    </kendo-chart-category-axis-item>
+                  </kendo-chart-category-axis>
+                  <kendo-chart-value-axis>
+                    <kendo-chart-value-axis-item [visible]="false" [majorGridLines]="{visible: false}">
+                    </kendo-chart-value-axis-item>
+                  </kendo-chart-value-axis>
+                </kendo-chart>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-12 col-lg-6 col-xl pb-4 text-danger open-issues">
+                <span class="comp-label">
+                  <strong>{{ deaths | number:'1.0':'en-US' }}   </strong>
+                  <small>Total Deaths as of {{ date}}</small>
+                </span>
+                <kendo-chart [transitions]="false" style="height: 160px;">
+                  <kendo-chart-series-defaults type="area" [overlay]="false">
+                  </kendo-chart-series-defaults>
+                  <kendo-chart-series>
+                    <kendo-chart-series-item [color]="'#CC3458'"
+                                             [data]="covid"
+                                             field="deaths"
+                                             categoryField="dateTime"
+                                             aggregate="sum">
+                      <kendo-chart-series-item-tooltip>
+                        <ng-template let-value="value" let-category="category">
+                          <span>{{category | date: 'shortDate'}}: {{value |  number:'1.0':'en-US' }}</span>
+                        </ng-template>
+                      </kendo-chart-series-item-tooltip>
+                    </kendo-chart-series-item>
+                  </kendo-chart-series>
+                  <kendo-chart-category-axis>
+                    <kendo-chart-category-axis-item [baseUnit]="baseUnit"
+                                                    [majorTicks]="{visible: false}"
+                                                    [labels]="{step: 30, skip: 2, font: '10px sans-serif'}"
+                                                    [majorGridLines]="{visible: false}"
+                                                    [line]="{visible: false}"></kendo-chart-category-axis-item>
+                  </kendo-chart-category-axis>
+                  <kendo-chart-value-axis>
+                    <kendo-chart-value-axis-item [visible]="false" [majorGridLines]="{visible: false}">
+
+                    </kendo-chart-value-axis-item>
+                  </kendo-chart-value-axis>
+                </kendo-chart>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-      <div class="row">
-        <div class="col-12 col-lg-6 col-xl pb-4 text-danger open-issues">
-          <span class="comp-label">
-            <strong>{{ deaths | number:'1.0':'en-US' }}   </strong> 
-            <small>Deaths as of {{ date}}</small>
-          </span>
-          <kendo-chart [transitions]="false" style="height: 80px;">
-            <kendo-chart-series-defaults type="area" [overlay]="false">
-            </kendo-chart-series-defaults>
-            <kendo-chart-series>
-              <kendo-chart-series-item [color]="'#CC3458'"
-                                       [data]="covid"
-                                       field="deaths"
-                                       categoryField="dateTime"
-                                       aggregate="sum">
-                <kendo-chart-series-item-tooltip>
-                  <ng-template let-value="value" let-category="category">
-                    <span>{{category | date: 'shortDate'}}: {{value |  number:'1.0':'en-US' }}</span>
-                  </ng-template>
-                </kendo-chart-series-item-tooltip>
-              </kendo-chart-series-item>
-            </kendo-chart-series>
-            <kendo-chart-category-axis>
-              <kendo-chart-category-axis-item [baseUnit]="baseUnit"
-                                              [majorTicks]="{visible: false}"
-                                              [labels]="{step: 30, skip: 2, font: '10px sans-serif'}"
-                                              [majorGridLines]="{visible: false}"
-                                              [line]="{visible: false}"></kendo-chart-category-axis-item>
-            </kendo-chart-category-axis>
-            <kendo-chart-value-axis>
-              <kendo-chart-value-axis-item [visible]="false" [majorGridLines]="{visible: false}">
+    </ng-template>
+  </kendo-tabstrip-tab>
+  <kendo-tabstrip-tab [title]="'Daily'"  >
+    <ng-template kendoTabContent>
+      <div class="dashboard">
+        <div class="card">
+          <div class="card-body">
+            <div class="row">
+              <div class="col-12 col-lg-6 col-xl pb-4 active-issues">
+                <span class="comp-label">
+                  <strong>{{daily_cases | number:'1.0':'en-US' }} </strong>
+                  <small>Daily Cases as of {{date}} </small>
+                </span>
+                <kendo-chart [transitions]="false" style="height: 160px;">
+                  <kendo-chart-series-defaults type="area"
+                                               [overlay]="false"></kendo-chart-series-defaults>
+                  <kendo-chart-series>
+                    <kendo-chart-series-item [color]="'#888'"
+                                             [data]=" covid"
+                                             field="daily_cases"
+                                             categoryField="dateTime"
+                                             aggregate="sum">
+                      <kendo-chart-series-item-tooltip>
+                        <ng-template let-value="value" let-category="category">
+                          <span>{{category | date: 'shortDate'}}: {{value |  number:'1.0':'en-US' }}</span>
+                        </ng-template>
+                      </kendo-chart-series-item-tooltip>
+                    </kendo-chart-series-item>
+                  </kendo-chart-series>
+                  <kendo-chart-category-axis>
+                    <kendo-chart-category-axis-item [baseUnit]="baseUnit"
+                                                    [majorTicks]="{visible: false}"
+                                                    [labels]="{step: 30, skip: 2, font: '10px sans-serif'}"
+                                                    [majorGridLines]="{visible: false}"
+                                                    [line]="{visible: false}">
 
-              </kendo-chart-value-axis-item>
-            </kendo-chart-value-axis>
-          </kendo-chart>
+                    </kendo-chart-category-axis-item>
+                  </kendo-chart-category-axis>
+                  <kendo-chart-value-axis>
+                    <kendo-chart-value-axis-item [visible]="false" [majorGridLines]="{visible: false}">
+                    </kendo-chart-value-axis-item>
+                  </kendo-chart-value-axis>
+                </kendo-chart>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-12 col-lg-6 col-xl pb-4 text-danger open-issues">
+                <span class="comp-label">
+                  <strong>{{ daily_deaths | number:'1.0':'en-US' }}   </strong>
+                  <small>Daily Deaths as of {{ date}}</small>
+                </span>
+                <kendo-chart [transitions]="false" style="height: 160px;">
+                  <kendo-chart-series-defaults type="area" [overlay]="false">
+                  </kendo-chart-series-defaults>
+                  <kendo-chart-series>
+                    <kendo-chart-series-item [color]="'#CC3458'"
+                                             [data]="covid"
+                                             field="daily_deaths"
+                                             categoryField="dateTime"
+                                             aggregate="sum">
+                      <kendo-chart-series-item-tooltip>
+                        <ng-template let-value="value" let-category="category">
+                          <span>{{category | date: 'shortDate'}}: {{value |  number:'1.0':'en-US' }}</span>
+                        </ng-template>
+                      </kendo-chart-series-item-tooltip>
+                    </kendo-chart-series-item>
+                  </kendo-chart-series>
+                  <kendo-chart-category-axis>
+                    <kendo-chart-category-axis-item [baseUnit]="baseUnit"
+                                                    [majorTicks]="{visible: false}"
+                                                    [labels]="{step: 30, skip: 2, font: '10px sans-serif'}"
+                                                    [majorGridLines]="{visible: false}"
+                                                    [line]="{visible: false}"></kendo-chart-category-axis-item>
+                  </kendo-chart-category-axis>
+                  <kendo-chart-value-axis>
+                    <kendo-chart-value-axis-item [visible]="false" [majorGridLines]="{visible: false}">
+
+                    </kendo-chart-value-axis-item>
+                  </kendo-chart-value-axis>
+                </kendo-chart>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
-  </div>
-</div>
+    </ng-template>
+  </kendo-tabstrip-tab>
+</kendo-tabstrip>

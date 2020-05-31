@@ -20,12 +20,14 @@
         </kendo-buttongroup>
     </div>
     <div class="col-md-3">
-         <kendo-slider #slider [tickPlacement]="tickPlacement"
-                      [min]="min"
-                      [max]="max"
-                      [smallStep]="smallStep"
-                      (valueChange)="valueChange($event)"></kendo-slider>
- 
+      <kendo-slider #slider [tickPlacement]="tickPlacement"
+                    [min]="min"
+                    [max]="max"
+                    [smallStep]="smallStep"
+                    [value]="value"
+                    [(ngModel)]="value"
+                    (valueChange)="valueChange($event)"></kendo-slider> 
+
     </div>
     <div class="col-md-6"   >
       <kendo-label text="Scale:"class="float-right">&nbsp;

@@ -11,7 +11,7 @@ import { DrillDownService } from '../shared/drilldown.services';
 
 import { Location } from '@angular/common';
 import {
-	formatDate
+  formatDate
 } from '@angular/common';
 import { SliderComponent } from '@progress/kendo-angular-inputs';
 
@@ -86,10 +86,11 @@ export class CountiesMapComponent implements OnInit {
   end;
   scale = "Sqrrt";
   type = "Filled";
-  metric = "Cases";
-  date = "2020-05-27";
-	dateMin = "2020-01-21";
-	dateMax = "2020-05-27"
+  metric = "Total Cases";
+  date;
+  dateMin = "2020-01-21";
+  dateMax;
+  tab = "Totals";
 
 
   linearScale;
@@ -114,12 +115,12 @@ export class CountiesMapComponent implements OnInit {
     .attr('class', 'tooltip')
     .style('opacity', 0);
 
-	/* slider */
-	public tickPlacement: string = 'none';
-	public value: number;
-	public min: number;
-	public max: number;
-	public smallStep: number = 86400000;
+  /* slider */
+  public tickPlacement: string = 'none';
+  public value: number;
+  public min: number;
+  public max: number;
+  public smallStep: number = 86400000;
 
 
   constructor(private elRef: ElementRef, public router: Router, public route: ActivatedRoute, private changeDetectorRef: ChangeDetectorRef, private drillDownService: DrillDownService, private location: Location) {
@@ -141,27 +142,32 @@ export class CountiesMapComponent implements OnInit {
         }
 
         if (this.route.snapshot.params['selectedScale']) {
-           this.scale = this.route.snapshot.params['selectedScale'];
-         }
+          this.scale = this.route.snapshot.params['selectedScale'];
+        }
+
+        if (this.route.snapshot.params['selectedTab']) {
+          this.tab = this.route.snapshot.params['selectedTab'];
+        }
 
         if (this.route.snapshot.params['selectedMetric']) {
-          this.metric = this.route.snapshot.params['selectedMetric'];  
+          this.metric = this.route.snapshot.params['selectedMetric'];
         }
 
         if (this.route.snapshot.params['selectedDate']) {
           this.date = this.route.snapshot.params['selectedDate'];
-          this.slider.value = new Date(this.date).getTime();
+          var value = new Date(this.date);
+          value.setHours(23, 59, 59, 999);
+          this.value = value.getTime();
+          this.slider.value = value.getTime();
         }
         else {
-          this.date = this.route.snapshot.params['selectedDate'];
+          this.date = formatDate(new Date().setDate(new Date().getDate() - 1), 'yyyy-MM-dd', 'en');
         }
-        
+
         if (this.router.url.indexOf('/counties') != -1) {
           this.removeExistingMapFromParent();
           this.updateMap(true);
         }
-
-
       });
     });
 
@@ -169,10 +175,7 @@ export class CountiesMapComponent implements OnInit {
 
   ngOnInit() {
 
-		this.min = new Date(this.dateMin).getTime();
-		this.max = new Date(this.dateMax).getTime();
-    // default to end date
-    this.value = this.max ;
+
 
   }
 
@@ -225,33 +228,76 @@ export class CountiesMapComponent implements OnInit {
         // that.reset(d, that);
       });
 
-    this.svg
-      .call(this.zoom); // delete this line to disable free zooming
+    //this.svg
+    // .call(this.zoom); // delete this line to disable free zooming
 
     this.g = this.svg.append('g');
 
     that.covid = coviddata.counties;
 
-	 var covidMax = that.covid.filter(function (d) {
-			return d.date === that.dateMax  && d.state === that.selectedState
-		});
+    that.dateMax = d3.max(that.covid, function (d: any) {
+      return d.date
+    });
 
-		that.start = 1;
+    // Slider values
+    that.min = new Date(that.dateMin).getTime();
+    var max = new Date(that.dateMax);
+    max.setHours(23, 59, 59, 999);
+    that.max = max.getTime();
+
+    // default to end date
+    if (!that.date) {
+      that.date = that.dateMax;
+      that.slider.value = that.value;
+    }
+
+    // Set date to max date if no data available
+    if (that.date > that.dateMax) {
+      that.date = that.dateMax;
+      that.value = that.max;
+      this.location.go('counties/' + this.selectedState + '/' + this.type + '/' + this.scale + '/' + this.metric + '/' + this.date);
+    }
+
+
+    var covidMax = that.covid.filter(function (d) {
+      return d.date === that.dateMax && d.state === that.selectedState
+    });
+
+    var covid = that.covid.filter(function (d) {
+      return d.state === that.selectedState
+    });
+
+    that.start = 1;
 
     // Get data for max date
-		that.end = d3.max(covidMax, function (d: any) {
-			switch (that.metric) {
-				case "Cases":
-					return d.cases;
-				case "Deaths":
-					return d.deaths;
-			}
-		});
+
+    switch (that.metric) {
+      case "Daily Deaths":
+        that.end = d3.max(covid, function (d: any) {
+          return d.daily_deaths;
+        })
+        break;
+      case "Daily Cases":
+        that.end = d3.max(covid, function (d: any) {
+          return d.daily_cases;
+        })
+        break;
+      case "Total Cases":
+        that.end = d3.max(covidMax, function (d: any) {
+          return d.cases;
+        })
+        break;
+      case "Total Deaths":
+        that.end = d3.max(covidMax, function (d: any) {
+          return d.deaths;
+        })
+        break;
+    }
 
     // Get current date
-		that.covid = that.covid.filter(function (d) {
-			return d.date === that.date  && d.state === that.selectedState
-		});
+    that.covid = that.covid.filter(function (d) {
+      return d.date === that.date && d.state === that.selectedState
+    });
 
     that.counties = topojson.feature(countiesdata, countiesdata.objects.collection).features;
 
@@ -259,14 +305,13 @@ export class CountiesMapComponent implements OnInit {
     if (that.selectedState != 'All') {
       that.counties = that.counties.filter(function (d) { return d.properties.state === that.selectedState });
 
-      if (that.drillDownService.x  && performZoom) {
+      if (that.drillDownService.x && performZoom) {
         that.svg.transition()
           .duration(750)
           .call(that.zoom.transform, d3.zoomIdentity.translate(that.drillDownService.x, that.drillDownService.y).scale(that.drillDownService.scale))
       }
-      else
-      {
-       that.svg.transition()
+      else {
+        that.svg.transition()
           .duration(0)
           .call(that.zoom.transform, d3.zoomIdentity.translate(that.drillDownService.x, that.drillDownService.y).scale(that.drillDownService.scale))
       }
@@ -277,11 +322,17 @@ export class CountiesMapComponent implements OnInit {
 
       var metric;
       switch (that.metric) {
-        case "Cases":
+        case "Total Cases":
           metric = covid ? covid.cases : 0;
           break;
-        case "Deaths":
+        case "Total Deaths":
           metric = covid ? covid.deaths : 0;
+          break;
+        case "Daily Cases":
+          metric = covid ? covid.daily_cases : 0;
+          break;
+        case "Daily Deaths":
+          metric = covid ? covid.daily_deaths : 0;
           break;
       }
 
@@ -295,7 +346,7 @@ export class CountiesMapComponent implements OnInit {
     });
 
     // Sort for bubble overlays
-    that.merged = that.merged.sort((a, b) => a.metric > b.metric ? - 1 : (a.metric < b.metric ? 1  : 0));
+    that.merged = that.merged.sort((a, b) => a.metric > b.metric ? - 1 : (a.metric < b.metric ? 1 : 0));
 
 
     // Linear Scale
@@ -369,7 +420,7 @@ export class CountiesMapComponent implements OnInit {
     that.colorScaleSqrt = d3.scaleSequential(d =>
       d3.interpolateReds(that.sqrtScale(d))
     );
- 
+
     switch (that.type) {
       case "Filled":
         that.legendLabels = [
@@ -407,7 +458,7 @@ export class CountiesMapComponent implements OnInit {
       .attr('fill', function (d) {
         var metric = d.metric;
         var metric = metric ? metric : 0;
-        if (that.type == "Filled"  && metric > 0) {
+        if (that.type == "Filled" && metric > 0) {
           switch (that.scale) {
             case "Linear":
               return that.colorScaleLinear(metric);
@@ -446,42 +497,42 @@ export class CountiesMapComponent implements OnInit {
       });
 
     if (that.type == "Bubble") {
-    that.g
-      .attr("class", "bubble")
-      .selectAll('circle')
-      .data(that.merged)
-      .enter().append("circle")
-      .attr("transform", function (d) { return "translate(" + that.path.centroid(d) + ")"; })
-      .attr("r", function (d) {
-        switch (that.scale) {
-          case "Linear":
-            return that.linearScale(d.metric);
-          case "Exponential":
-            return that.expScale(d.metric);
-          case "Logarithmic":
-            return that.logScale(d.metric);
-          case "Sqrrt":
-            return that.sqrtScale(d.metric);
-        }
-      })
-      .on('mouseover', function (d) {
-           that.tooltip.transition()
-             .duration(200)
-             .style('opacity', .9);
+      that.g
+        .attr("class", "bubble")
+        .selectAll('circle')
+        .data(that.merged)
+        .enter().append("circle")
+        .attr("transform", function (d) { return "translate(" + that.path.centroid(d) + ")"; })
+        .attr("r", function (d) {
+          switch (that.scale) {
+            case "Linear":
+              return that.linearScale(d.metric);
+            case "Exponential":
+              return that.expScale(d.metric);
+            case "Logarithmic":
+              return that.logScale(d.metric);
+            case "Sqrrt":
+              return that.sqrtScale(d.metric);
+          }
+        })
+        .on('mouseover', function (d) {
+          that.tooltip.transition()
+            .duration(200)
+            .style('opacity', .9);
 
-        that.tooltip.html(d.name + '<br/><b>Total ' + this.metric + ':</b> ' + that.formatDecimal(d.metric))
-             .style('left', (d3.event.pageX) + 'px')
-             .style('top', (d3.event.pageY) + 'px')
+          that.tooltip.html(d.name + '<br/><b>Total ' + this.metric + ':</b> ' + that.formatDecimal(d.metric))
+            .style('left', (d3.event.pageX) + 'px')
+            .style('top', (d3.event.pageY) + 'px')
 
-           that.changeDetectorRef.detectChanges();;
-         })
-      .on('mouseout', function (d) {
-        that.tooltip.transition()
-          .duration(300)
-          .style('opacity', 0);
+          that.changeDetectorRef.detectChanges();;
+        })
+        .on('mouseout', function (d) {
+          that.tooltip.transition()
+            .duration(300)
+            .style('opacity', 0);
 
-        that.changeDetectorRef.detectChanges();;
-      });
+          that.changeDetectorRef.detectChanges();;
+        });
 
     }
 
@@ -646,20 +697,20 @@ export class CountiesMapComponent implements OnInit {
     this.updateMap(true);
   }
 
-  selectedTypeChange(e, btn  ) {
+  selectedTypeChange(e, btn) {
     this.type = btn.text;
     this.location.go('counties/' + this.selectedState + '/' + this.type + '/' + this.scale + '/' + this.metric + '/' + this.date);
     this.removeExistingMapFromParent();
     this.updateMap(true);
   }
 
-	valueChange(e) {
-		this.value = e;
+  valueChange(e) {
+    this.value = e;
     this.date = formatDate(new Date(this.value), 'yyyy-MM-dd', 'en');
     this.location.go('counties/' + this.selectedState + '/' + this.type + '/' + this.scale + '/' + this.metric + '/' + this.date);
     this.dateChanged.emit(this.date);
     this.removeExistingMapFromParent();
-		this.updateMap(false);
-	}
+    this.updateMap(false);
+  }
 
 }

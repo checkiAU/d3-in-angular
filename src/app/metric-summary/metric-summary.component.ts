@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, ViewChild } from '@angular/core';
 
 import * as d3 from "d3";
 import * as statedata from "../data/states-historical.json";
@@ -6,6 +6,7 @@ import countydata from "../data/counties-historical.json";
 import { ActivatedRoute, Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { Subscription } from 'rxjs';
+import { TabStripTabComponent, TabStripComponent } from '@progress/kendo-angular-layout';
  
 
 @Component({
@@ -15,14 +16,20 @@ import { Subscription } from 'rxjs';
 })
 export class MetricSummaryComponent implements OnInit {
 
+  @ViewChild('tab', { static: true }) tab: TabStripComponent;
+
   public baseUnit = 'days';
 
   covid: any[] = [];
  
   cases;
   deaths;
-  date = "2020-05-27";
+  daily_cases;
+  daily_deaths;
+
+  date ;
   selectedState;
+  selectedTab = "Totals";
 
   private _routerSub = Subscription.EMPTY;
 
@@ -43,6 +50,18 @@ export class MetricSummaryComponent implements OnInit {
           
           if (this.route.snapshot.params['selectedDate']) {
             this.date = this.route.snapshot.params['selectedDate'];
+          }
+
+          if (this.route.snapshot.params['selectedTab']) {
+            this.selectedTab = this.route.snapshot.params['selectedTab'];
+            switch (this.selectedTab) {
+              case "Totals":
+                this.tab.selectTab(0);
+                break;
+              case "Daily":
+                this.tab.selectTab(1);
+                break;
+            }
           }
 
         });
@@ -69,6 +88,16 @@ export class MetricSummaryComponent implements OnInit {
     
    
     var that = this;
+
+    var dateMax = d3.max(that.covid, function (d: any) {
+      return d.date
+    });
+
+    // default to end date
+    if (!that.date) {
+      that.date = dateMax;
+    }
+
     var covidSelected = this.covid.filter(function (d) {
       return d.date === that.date
     });
@@ -80,6 +109,15 @@ export class MetricSummaryComponent implements OnInit {
     this.deaths = d3.sum(covidSelected, function (d: any) {
       return d.deaths;
     });
+
+    this.daily_cases = d3.sum(covidSelected, function (d: any) {
+      return d.daily_cases;
+    });
+
+    this.daily_deaths = d3.sum(covidSelected, function (d: any) {
+      return d.daily_deaths;
+    });
+
 
     this.covid.forEach((element) => {
       element.dateTime = new Date(element.date);

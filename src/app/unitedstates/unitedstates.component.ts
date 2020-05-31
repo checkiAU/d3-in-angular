@@ -22,7 +22,7 @@ export class UnitedStatesComponent implements OnInit, OnDestroy, AfterContentIni
   @ViewChild('metricTable', { static: true }) metricTable: MetricTableComponent;
 
   private _routerSub = Subscription.EMPTY;
-  public metric = "Cases";
+  public metric = "Total Cases";
   public icon = "place";
   constructor(private router: Router, public route: ActivatedRoute) {
 
@@ -33,10 +33,16 @@ export class UnitedStatesComponent implements OnInit, OnDestroy, AfterContentIni
         if (this.route.snapshot.params['selectedMetric']) {
           this.metric = this.route.snapshot.params['selectedMetric'];
           switch (this.metric) {
-            case "Cases":
+            case "Daily Cases":
               this.icon = "place";
               break;
-            case "Deaths":
+            case "Total Cases":
+              this.icon = "place";
+              break;
+            case "Daily Deaths":
+              this.icon = "warning";
+              break;
+            case "Total Deaths":
               this.icon = "warning";
               break;
           }

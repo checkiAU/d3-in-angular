@@ -4,6 +4,9 @@ import { trigger, transition, query, style, animate } from '@angular/animations'
 import { slideInAnimation } from './animation';
 import { DrawerSelectEvent } from '@progress/kendo-angular-layout';
 import { RouterOutlet } from '@angular/router';
+import {
+  formatDate
+} from '@angular/common';
 
 @Component({
   encapsulation: ViewEncapsulation.None,
@@ -23,9 +26,13 @@ export class AppComponent implements OnInit {
   @ViewChild('drawer') drawer;
   @ViewChild('navmenu') navmenu;
 
+  date = formatDate(new Date().setDate(new Date().getDate() - 1), 'yyyy-MM-dd', 'en');
+
   public items: Array<any> = [
-    { text: 'Cases', icon: 'place', path: '/unitedstates/Filled/Sqrrt/Cases/2020-05-27' },
-    { text: 'Deaths', icon: 'warning', path: '/unitedstates/Filled/Sqrrt/Deaths/2020-05-27' },
+    { text: 'Cases', icon: 'place', path: '/unitedstates/Filled/Sqrrt/Total Cases/' + this.date  + '/Totals' },
+    { text: 'Daily Cases', icon: 'place', path: '/unitedstates/Filled/Sqrrt/Daily Cases/' + this.date + '/Daily' },
+    { text: 'Deaths', icon: 'warning', path: '/unitedstates/Filled/Sqrrt/Total Deaths/' + this.date + '/Totals'},
+    { text: 'Daily Deaths', icon: 'warning', path: '/unitedstates/Filled/Sqrrt/Daily Deaths/' + this.date + '/Daily' },
     { text: 'About', icon: 'contact_mail', path: '/about' },
 
   ];
