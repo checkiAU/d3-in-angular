@@ -1,5 +1,5 @@
 # Tracking Covid-19 data with interactive maps and charts in Angular 9 using D3
-
+w o w 
 This projects shows how to build interactive maps and charts of COVID-19 data inside an Angular 9 application using the D3 JavaScript framework.
 
 ![GitHub Preview](/images/preview.png)
